@@ -2,6 +2,7 @@
   'use strict';
 
   const VIEW_KEY = 'teamdeck-active-view';
+  const DEMO_SESSION_VERSION = '2026-09-20-reset-2';
   const fallbackView = 'dashboard';
   const routes = {
     dashboard: '/dashboard',
@@ -98,6 +99,13 @@
   }
 
   function enforceAuthentication() {
+    if (localStorage.getItem('teamdeck-auth-method') === 'demo' && localStorage.getItem('teamdeck-demo-session-version') !== DEMO_SESSION_VERSION) {
+      localStorage.removeItem('teamdeck-auth');
+      localStorage.removeItem('teamdeck-auth-method');
+      localStorage.removeItem('teamdeck-auth-profile');
+      localStorage.removeItem('teamdeck-auth-email');
+      localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
+    }
     if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') {
       window.showLoginScreen();
     }
