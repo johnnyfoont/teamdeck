@@ -97,6 +97,12 @@
     if (typeof window.loadInterfacePreferences === 'function') window.loadInterfacePreferences();
   }
 
+  function enforceAuthentication() {
+    if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') {
+      window.showLoginScreen();
+    }
+  }
+
   function bindNavigation() {
     document.querySelectorAll('#nav [data-view]').forEach((button) => {
       button.onclick = null;
@@ -133,6 +139,7 @@
     bindNavigation();
     restoreActiveView();
     syncPreferences();
+    enforceAuthentication();
   }
 
   if (document.readyState === 'loading') {
