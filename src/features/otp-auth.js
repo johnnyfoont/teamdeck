@@ -3,6 +3,7 @@
 
   let requestedEmail = '';
   let codeRequested = false;
+  const DEMO_SESSION_VERSION = '2026-09-20-reset-1';
 
   function form() { return document.querySelector('.auth-form'); }
   function errorNode() { return document.getElementById('authError'); }
@@ -13,6 +14,17 @@
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function isOtpSession() { return localStorage.getItem('teamdeck-auth-method') === 'otp'; }
   const demoProfile = { name: 'Шумов Евгений', picture: 'assets/profile/evgeny-shumov.jpg' };
+
+  function invalidateOldDemoSession() {
+    if (localStorage.getItem('teamdeck-auth-method') !== 'demo') return false;
+    if (localStorage.getItem('teamdeck-demo-session-version') === DEMO_SESSION_VERSION) return false;
+    localStorage.removeItem('teamdeck-auth');
+    localStorage.removeItem('teamdeck-auth-method');
+    localStorage.removeItem('teamdeck-auth-profile');
+    localStorage.removeItem('teamdeck-auth-email');
+    localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
+    return true;
+  }
 
   function renderOtpForm(prefill = savedEmail()) {
     const target = form();
@@ -137,6 +149,7 @@
       localStorage.removeItem('teamdeck-auth-profile');
       localStorage.removeItem('teamdeck-auth-email');
       localStorage.setItem('teamdeck-auth-method', 'demo');
+      localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     }
     if (typeof originalLogin === 'function') originalLogin();
     if (username === 'demo' && password === 'demo') syncProfile(demoProfile, 'demo');
@@ -152,7 +165,14 @@
   };
 
   window.initOtpAuth = renderOtpForm;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); finishExternalLogin(); });
-  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); finishExternalLogin(); }
+  function initOtpAuth() {
+    const invalidated = invalidateOldDemoSession();
+    renderOtpForm();
+    syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo');
+    if (invalidated && typeof window.showLoginScreen === 'function') window.showLoginScreen();
+    finishExternalLogin();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initOtpAuth);
+  else initOtpAuth();
   if (new URLSearchParams(location.search).get('gmail') === 'connected') setTimeout(() => setStatus('Gmail подключён. Теперь можно запросить код.'), 0);
 }());
