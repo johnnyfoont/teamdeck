@@ -148,15 +148,16 @@
     if (item) item.style.display = (!authMethod() || authMethod() === 'demo') ? '' : 'none';
   }
   function showBlockedScreen(identity = savedEmail()) {
-    clearInterval(sessionMonitor);
+    clearInterval(sessionMonitor); document.body.classList.add('auth-minimal');
     localStorage.setItem('teamdeck-blocked-state', identity || 'blocked');
     localStorage.removeItem('teamdeck-auth'); localStorage.removeItem('teamdeck-auth-method'); localStorage.removeItem('teamdeck-auth-profile'); localStorage.removeItem('teamdeck-auth-email');
     const app = document.querySelector('.app'); if (app) app.style.display = 'none';
     const screen = document.getElementById('authScreen'); if (!screen) return;
     screen.classList.add('open', 'blocked-screen');
     const label = String(identity || 'Ваш аккаунт').replace(/[&<>"']/g, value => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[value]));
-    screen.innerHTML = `<div class="blocked-card"><div class="blocked-mark">!</div><span class="section-kicker">ДОСТУП ОГРАНИЧЕН</span><h1>Аккаунт заблокирован</h1><p>Администратор ограничил доступ к платформе для этого идентификатора. Вход, просмотр данных и повторная авторизация недоступны.</p><div class="blocked-identity">${label}</div><div class="blocked-actions"><a class="btn primary" href="mailto:support@teamdeck.ru?subject=Запрос на разблокировку аккаунта">Написать в поддержку</a><a class="btn blocked-secondary" href="mailto:support@teamdeck.ru?subject=Вопрос по блокировке аккаунта">Связаться по e-mail</a></div><small>Укажите этот идентификатор в обращении — так поддержка быстрее найдёт запись.</small></div>`;
+    screen.innerHTML = `<div class="blocked-card"><div class="blocked-mark">!</div><span class="section-kicker">ДОСТУП ОГРАНИЧЕН</span><h1>Аккаунт заблокирован</h1><p>Администратор ограничил доступ к платформе для этого идентификатора. Вход, просмотр данных и повторная авторизация недоступны.</p><div class="blocked-identity"><span>${label}</span><button class="blocked-copy-button" type="button" aria-label="Скопировать идентификатор" title="Скопировать идентификатор" onclick="window.copyBlockedIdentity(this)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 16V6a2 2 0 0 1 2-2h10"/></svg></button></div><div class="blocked-actions"><a class="btn primary" href="mailto:support@teamdeck.ru?subject=Запрос на разблокировку аккаунта">Написать в поддержку</a><a class="btn blocked-secondary" href="mailto:support@teamdeck.ru?subject=Вопрос по блокировке аккаунта">Связаться по e-mail</a></div><small>Укажите этот идентификатор в обращении — так поддержка быстрее найдёт запись.</small></div>`;
   }
+  window.copyBlockedIdentity = function (button) { const identity = button.closest('.blocked-identity')?.querySelector('span')?.textContent || ''; navigator.clipboard?.writeText(identity).then(() => { button.classList.add('copied'); button.title = 'Скопировано'; setTimeout(() => { button.classList.remove('copied'); button.title = 'Скопировать идентификатор'; }, 1400); }).catch(() => {}); };
   function startSessionMonitor() {
     clearInterval(sessionMonitor);
     if (!isOtpSession() && !isExternalSession()) return;
@@ -189,6 +190,7 @@
   };
   window.logoutUser = function () {
     clearInterval(sessionMonitor);
+    document.body.classList.add('auth-minimal');
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();
     localStorage.removeItem('teamdeck-auth-profile');
@@ -205,6 +207,7 @@
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
     renderOtpForm();
+    if (localStorage.getItem('teamdeck-auth') !== 'logged-in') document.body.classList.add('auth-minimal');
     const external = isOtpSession() || isExternalSession();
     syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
     syncSecurityMenu();
