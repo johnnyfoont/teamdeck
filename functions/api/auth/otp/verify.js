@@ -10,5 +10,7 @@ export async function onRequestPost({ request, env }) {
   await env.TEAMDECK_KV.delete(key);
   const session = randomToken();
   await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
-  return json({ ok: true, email }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30) });
+  const connectedProfile = await env.TEAMDECK_KV.get('gmail:profile', 'json');
+  const profile = connectedProfile && normalizeEmail(connectedProfile.email) === email ? { name: connectedProfile.name, picture: connectedProfile.picture } : null;
+  return json({ ok: true, email, profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30) });
 }

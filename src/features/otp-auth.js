@@ -10,6 +10,7 @@
   function setError(message) { const node = errorNode(); if (node) node.textContent = message || ''; }
   function setStatus(message) { const node = statusNode(); if (node) node.textContent = message || ''; }
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
+  function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
 
   function renderOtpForm(prefill = savedEmail()) {
     const target = form();
@@ -65,26 +66,31 @@
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Код не принят');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-email', data.email); localStorage.setItem('teamdeck-active-view', 'dashboard');
-      syncProfileName(data.email);
+      if (data.profile) localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+      else localStorage.removeItem('teamdeck-auth-profile');
+      syncProfile(data.profile || { name: data.email });
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
     } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; setError(error.message); }
   }
 
-  function syncProfileName(name) {
-    if (!name) return;
+  function syncProfile(profile) {
+    const name = profile?.name || savedEmail() || 'Евгений Шумов';
+    const picture = profile?.picture || 'assets/profile/default-avatar.svg';
     document.querySelectorAll('#profileTrigger b, #profileMenu .profile-menu-head b').forEach(node => { node.textContent = name; });
+    document.querySelectorAll('#profileTrigger img').forEach(node => { node.src = picture; node.alt = name; });
   }
 
   const originalLogout = window.logoutUser;
   window.logoutUser = function () {
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();
+    localStorage.removeItem('teamdeck-auth-profile');
     renderOtpForm(email);
-    syncProfileName('Евгений Шумов');
+    syncProfile({ name: 'Евгений Шумов' });
   };
 
   window.initOtpAuth = renderOtpForm;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfileName(savedEmail() || 'Евгений Шумов'); });
-  else { renderOtpForm(); syncProfileName(savedEmail() || 'Евгений Шумов'); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(savedProfile() || { name: savedEmail() || 'Евгений Шумов' }); });
+  else { renderOtpForm(); syncProfile(savedProfile() || { name: savedEmail() || 'Евгений Шумов' }); }
   if (new URLSearchParams(location.search).get('gmail') === 'connected') setTimeout(() => setStatus('Gmail подключён. Теперь можно запросить код.'), 0);
 }());
