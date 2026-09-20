@@ -58,7 +58,7 @@
     return items.sort((a, b) => modalSort === 'oldest' ? String(a.time).localeCompare(String(b.time)) : String(b.time).localeCompare(String(a.time)));
   }
   function customDropdown(key, selected, label, values) {
-    const options = [{ value: 'all', label }, ...values.map(value => ({ value, label: value }))];
+    const options = [{ value: 'all', label }, ...values.map(value => typeof value === 'object' ? value : ({ value, label: value }))];
     const active = options.find(option => option.value === selected) || options[0];
     return `<div class="security-custom-select"><button type="button" class="security-custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="window.securityToggleDropdown(this)">${esc(active.label)}<span class="security-select-chevron" aria-hidden="true">⌄</span></button><div class="security-custom-select-menu" role="listbox">${options.map(option => `<button type="button" role="option" class="${option.value === selected ? 'is-selected' : ''}" onclick="window.securityLogSet('${key}', '${esc(option.value)}')">${option.value === selected ? '✓ ' : ''}${esc(option.label)}</button>`).join('')}</div></div>`;
   }
