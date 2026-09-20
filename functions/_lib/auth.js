@@ -53,6 +53,6 @@ export async function getGmailAccessToken(env) {
   return data.access_token;
 }
 
-export function appOrigin(request) {
-  return new URL(request.url).origin;
+export function appOrigin(request, env) {
+  return env.APP_ORIGIN || new URL(request.url).origin;
 }
