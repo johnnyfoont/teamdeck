@@ -37,7 +37,7 @@
 
   function filterValues(items, key) { return [...new Set(items.map(item => item[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'ru')); }
   function deviceCategory(value) { const text = String(value || '').toLowerCase(); if (/ipad|tablet|android(?!.*mobile)/i.test(text)) return 'Планшет'; if (/iphone|android.*mobile|mobile|phone/i.test(text)) return 'Смартфон'; return 'Десктоп'; }
-  function isCurrentSession(item) { return Boolean(item && (item.current || item.id === 'demo-current' || item.identity === 'demo')); }
+  function isCurrentSession(item) { return Boolean(item && (item.current || item.id === 'demo-current' || item.identity === 'demo' || item.lastSeen === 'Сейчас')); }
   const deviceCategories = ['Десктоп', 'Смартфон', 'Планшет'];
   const countryCatalog = { RU: ['Россия', '🇷🇺', 'Россия и СНГ'], SK: ['Словакия', '🇸🇰', 'Европа'], DE: ['Германия', '🇩🇪', 'Европа'], FR: ['Франция', '🇫🇷', 'Европа'], GB: ['Великобритания', '🇬🇧', 'Европа'], CN: ['Китай', '🇨🇳', 'Азия'], SG: ['Сингапур', '🇸🇬', 'Азия'], JP: ['Япония', '🇯🇵', 'Азия'], US: ['США', '🇺🇸', 'Америка'], CA: ['Канада', '🇨🇦', 'Америка'], AU: ['Австралия', '🇦🇺', 'Океания'] };
   function methodLabel(value) { const text = String(value || ''); return /^(Яндекс|Yandex|Telegram|Телеграм)$/i.test(text) ? `${text} Auth` : text; }
@@ -65,7 +65,7 @@
   function customDropdown(key, selected, label, values) {
     const options = [{ value: 'all', label }, ...values.map(value => typeof value === 'object' ? value : ({ value, label: value }))];
     const active = options.find(option => option.value === selected) || options[0];
-    return `<div class="security-custom-select"><button type="button" class="security-custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="window.securityToggleDropdown(this)">${esc(active.label)}<span class="security-select-chevron" aria-hidden="true">⌄</span></button><div class="security-custom-select-menu" role="listbox">${options.map(option => `<button type="button" role="option" class="${option.value === selected ? 'is-selected' : ''}" onclick="window.securityLogSet('${key}', '${esc(option.value)}')">${option.value === selected ? '✓ ' : ''}${esc(option.label)}</button>`).join('')}</div></div>`;
+    return `<div class="security-custom-select"><button type="button" class="security-custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="window.securityToggleDropdown(this)">${esc(active.label)}<span class="security-select-chevron" aria-hidden="true"></span></button><div class="security-custom-select-menu" role="listbox">${options.map(option => `<button type="button" role="option" class="${option.value === selected ? 'is-selected' : ''}" onclick="window.securityLogSet('${key}', '${esc(option.value)}')">${option.value === selected ? '✓ ' : ''}${esc(option.label)}</button>`).join('')}</div></div>`;
   }
   function statusLabel(status) { return status === 'blocked' ? 'Заблокирована' : status === 'revoked' ? 'Неактивна' : 'Активна'; }
 
