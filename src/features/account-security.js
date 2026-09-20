@@ -20,13 +20,14 @@
       { id: 'seed-otp', type: 'login', title: 'Вход выполнен', user: 'shumov.eugene@gmail.com', method: 'Одноразовый код', time: '2026-09-20T20:35:00Z', meta: 'Safari · macOS · Россия' },
       { id: 'seed-failed', type: 'failed', title: 'Неудачная попытка входа', user: 'demo', method: 'Логин и пароль', time: '2026-09-20T19:12:00Z', meta: 'Chrome · Windows' }
     ],
-    blocked: []
+    blocked: [],
+    blockedMeta: {}
   };
 
   function state() {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      return { ...seed, ...stored, sessions: stored.sessions || seed.sessions, events: stored.events || seed.events, blocked: stored.blocked || seed.blocked };
+      return { ...seed, ...stored, sessions: stored.sessions || seed.sessions, events: stored.events || seed.events, blocked: stored.blocked || seed.blocked, blockedMeta: stored.blockedMeta || seed.blockedMeta };
     } catch (_) { return { ...seed }; }
   }
   function save(value) { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); }
@@ -72,7 +73,7 @@
     return `<div class="security-custom-select"><button type="button" class="security-custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="window.securityToggleDropdown(this)">${esc(active.label)}<span class="security-select-chevron" aria-hidden="true"></span></button><div class="security-custom-select-menu" role="listbox">${options.map(option => `<button type="button" role="option" class="${option.value === selected ? 'is-selected' : ''}" onclick="window.securityLogSet('${key}', '${esc(option.value)}')">${option.value === selected ? '✓ ' : ''}${esc(option.label)}</button>`).join('')}</div></div>`;
   }
   function statusLabel(status) { return status === 'blocked' ? 'Заблокирована' : status === 'revoked' ? 'Неактивна' : 'Активна'; }
-  function blockedDetails(s, identity) { const sessions = s.sessions.filter(item => item.identity === identity); const latest = sessions[0]; const login = s.events.filter(item => item.type === 'login' && (item.identity === identity || item.user === identity || item.user === latest?.user)).sort((a, b) => String(b.time).localeCompare(String(a.time)))[0]; const blockedEvent = s.events.filter(item => item.type === 'block' && (item.identity === identity || item.user === identity)).sort((a, b) => String(b.time).localeCompare(String(a.time)))[0]; return { user: latest?.user || identity, lastVisit: latest?.lastSeen || (login ? formatTime(login.time) : '—'), blockedAt: blockedEvent ? formatTime(blockedEvent.time) : '—' }; }
+  function blockedDetails(s, identity) { const sessions = s.sessions.filter(item => item.identity === identity); const latest = sessions[0]; const login = s.events.filter(item => item.type === 'login' && (item.identity === identity || item.user === identity || item.user === latest?.user)).sort((a, b) => String(b.time).localeCompare(String(a.time)))[0]; const blockedEvent = s.events.filter(item => item.type === 'block' && (item.identity === identity || item.user === identity)).sort((a, b) => String(b.time).localeCompare(String(a.time)))[0]; const meta = s.blockedMeta?.[identity]; return { user: latest?.user || identity, lastVisit: latest?.lastSeen || (login ? formatTime(login.time) : '—'), blockedAt: blockedEvent ? formatTime(blockedEvent.time) : (meta?.blockedAt ? formatTime(meta.blockedAt) : '—') }; }
 
   function openSecurityConfirm({ title, text, actionLabel, danger, onConfirm }) {
     document.querySelector('.security-confirm-modal')?.remove();
@@ -104,13 +105,13 @@
     const modalWasOpen = Boolean(document.querySelector('.security-log-modal')); const modalState = { mode: modalMode, query: modalQuery, method: modalMethod, device: modalDevice, location: modalLocation, sort: modalSort };
     fetch('/api/auth/security/block', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity }) }).catch(() => {});
     const s = state();
-    if (!s.blocked.includes(identity)) s.blocked.push(identity);
+    if (!s.blocked.includes(identity)) s.blocked.push(identity); s.blockedMeta[identity] = { blockedAt: new Date().toISOString() };
     s.sessions.filter(x => x.identity === identity).forEach(x => x.status = 'blocked');
     s.events.unshift({ id: `local-block-${Date.now()}`, type: 'block', title: 'Пользователь заблокирован', user: identity, method: 'Все способы входа', time: new Date().toISOString(), meta: 'Главный аккаунт' });
     save(s); render(); if (modalWasOpen) { window.openSecurityLogs(modalState.mode); modalQuery = modalState.query; modalMethod = modalState.method; modalDevice = modalState.device; modalLocation = modalState.location; modalSort = modalState.sort; renderModal(); }
   }
   function unblock(identity) {
-    const s = state(); s.blocked = s.blocked.filter(x => x !== identity); s.sessions.filter(x => x.identity === identity).forEach(x => { x.status = 'active'; }); fetch('/api/auth/security/unblock', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity }) }).catch(() => {});
+    const s = state(); s.blocked = s.blocked.filter(x => x !== identity); delete s.blockedMeta[identity]; s.sessions.filter(x => x.identity === identity).forEach(x => { x.status = 'active'; }); fetch('/api/auth/security/unblock', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity }) }).catch(() => {});
     s.events.unshift({ id: `local-unblock-${Date.now()}`, type: 'unblock', title: 'Блокировка снята', user: identity, method: 'Управление доступом', time: new Date().toISOString(), meta: 'Главный аккаунт' });
     save(s); render();
   }
@@ -141,9 +142,10 @@
     remoteLoaded = true;
     try {
       const response = await fetch('/api/auth/security/logs', { cache: 'no-store' });
-      const payload = await response.json(); const events = Array.isArray(payload.events) ? payload.events : [];
-      if (!events.length) return;
-      const current = state(); const known = new Set(current.events.map(event => event.id || `${event.type}:${event.time}:${event.user}`));
+      const payload = await response.json(); const events = Array.isArray(payload.events) ? payload.events : []; const remoteBlocked = Array.isArray(payload.blocked) ? payload.blocked : [];
+      const current = state(); current.blocked = [...new Set([...current.blocked, ...remoteBlocked.map(item => item.identity).filter(Boolean)])]; remoteBlocked.forEach(item => { if (item.identity) current.blockedMeta[item.identity] = { blockedAt: item.blockedAt }; }); save(current);
+      if (!events.length && !remoteBlocked.length) return;
+      const known = new Set(current.events.map(event => event.id || `${event.type}:${event.time}:${event.user}`));
       current.events = [...events.filter(event => !known.has(event.id || `${event.type}:${event.time}:${event.user}`)), ...current.events].sort((a, b) => String(b.time).localeCompare(String(a.time))); current.blocked = [...new Set([...current.blocked, ...events.filter(event => event.type === 'block' && event.status === 'blocked').map(event => event.identity || event.user).filter(Boolean)])];
       const remoteSessions = events.filter(event => event.type === 'login').map(event => ({ id: `remote-${event.id}`, user: event.user, identity: event.identity || event.user, method: event.method, device: event.device, location: event.location, country: event.country, countryFlag: event.countryFlag, region: event.region, lastSeen: formatTime(event.lastSeen || event.time), status: event.status || 'active' }));
       current.sessions = [...remoteSessions, ...current.sessions.filter(session => !session.id.startsWith('remote-'))]; save(current); render();
