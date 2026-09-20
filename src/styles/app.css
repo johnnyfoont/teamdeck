@@ -384,3 +384,5 @@ html.auth-blocked .auth-screen{display:flex;background:#101827}html.auth-blocked
 
 /* Preview option: full-width security panels stacked vertically. */
 .security-page .security-grid{grid-template-columns:1fr}.security-page .security-grid>.security-panel{height:min(500px,calc(100vh - 280px))}.security-page .security-event-list .security-event{grid-template-columns:minmax(0,1fr) auto;align-items:center}@media(max-width:600px){.security-page .security-grid>.security-panel{height:390px}}
+
+.security-status.revoked{background:rgba(150,160,175,.16);color:#aeb8c8}.security-status.blocked{background:rgba(224,82,82,.18);color:#ff9b9b;border:1px solid rgba(224,82,82,.22)}

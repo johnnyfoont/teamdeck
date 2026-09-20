@@ -66,7 +66,7 @@
     const active = options.find(option => option.value === selected) || options[0];
     return `<div class="security-custom-select"><button type="button" class="security-custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="window.securityToggleDropdown(this)">${esc(active.label)}<span class="security-select-chevron" aria-hidden="true">⌄</span></button><div class="security-custom-select-menu" role="listbox">${options.map(option => `<button type="button" role="option" class="${option.value === selected ? 'is-selected' : ''}" onclick="window.securityLogSet('${key}', '${esc(option.value)}')">${option.value === selected ? '✓ ' : ''}${esc(option.label)}</button>`).join('')}</div></div>`;
   }
-  function statusLabel(status) { return status === 'blocked' ? 'Заблокирована' : status === 'revoked' ? 'Завершена' : 'Активна'; }
+  function statusLabel(status) { return status === 'blocked' ? 'Заблокирована' : status === 'revoked' ? 'Неактивна' : 'Активна'; }
 
   function openSecurityConfirm({ title, text, actionLabel, danger, onConfirm }) {
     document.querySelector('.security-confirm-modal')?.remove();
