@@ -12,6 +12,7 @@
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function isOtpSession() { return localStorage.getItem('teamdeck-auth-method') === 'otp'; }
+  const demoProfile = { name: 'Шумов Евгений', picture: 'assets/profile/evgeny-shumov.jpg' };
 
   function renderOtpForm(prefill = savedEmail()) {
     const target = form();
@@ -92,7 +93,7 @@
       localStorage.setItem('teamdeck-auth-method', 'demo');
     }
     if (typeof originalLogin === 'function') originalLogin();
-    if (username === 'demo' && password === 'demo') syncProfile({ name: 'Евгений Шумов' });
+    if (username === 'demo' && password === 'demo') syncProfile(demoProfile);
   };
   window.logoutUser = function () {
     const email = localStorage.getItem('teamdeck-auth-email') || '';
@@ -101,11 +102,11 @@
     localStorage.removeItem('teamdeck-auth-method');
     localStorage.removeItem('teamdeck-auth-email');
     renderOtpForm(email);
-    syncProfile({ name: 'Евгений Шумов' });
+    syncProfile(demoProfile);
   };
 
   window.initOtpAuth = renderOtpForm;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : { name: 'Евгений Шумов' }); });
-  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : { name: 'Евгений Шумов' }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile); });
+  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile); }
   if (new URLSearchParams(location.search).get('gmail') === 'connected') setTimeout(() => setStatus('Gmail подключён. Теперь можно запросить код.'), 0);
 }());
