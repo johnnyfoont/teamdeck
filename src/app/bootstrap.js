@@ -16,6 +16,7 @@
     integrations: '/integrations',
     recruitment: '/recruitment',
     settings: '/settings',
+    security: '/security',
   };
   const viewsByPath = Object.fromEntries(Object.entries(routes).map(([view, path]) => [path, view]));
 
@@ -57,6 +58,7 @@
       team: 'renderCompanyTeam',
       analytics: 'updateAnalytics',
       settings: 'renderSettings',
+      security: 'renderSecurity',
     };
     const renderer = window[renderers[view]];
     if (typeof renderer !== 'function') return;
