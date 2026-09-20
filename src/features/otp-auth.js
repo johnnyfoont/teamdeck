@@ -28,7 +28,28 @@
   window.startExternalLogin = function (provider) {
     const labels = { yandex: 'Яндекс', mailru: 'Mail.ru', telegram: 'Telegram' };
     if (provider === 'yandex') { window.location.href = '/api/auth/yandex/start'; return; }
+    if (provider === 'telegram') {
+      const existing = document.getElementById('telegram-login-widget');
+      if (existing) { existing.hidden = false; return; }
+      const host = document.querySelector('.external-auth-grid');
+      if (!host) return;
+      const wrapper = document.createElement('div'); wrapper.id = 'telegram-login-widget'; wrapper.className = 'telegram-login-widget';
+      host.insertAdjacentElement('afterend', wrapper);
+      const script = document.createElement('script'); script.async = true; script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.dataset.telegramLogin = 'teamdeck_login_bot'; script.dataset.size = 'medium'; script.dataset.userpic = 'false'; script.dataset.requestAccess = 'write'; script.dataset.onauth = 'onTelegramAuth(user)';
+      wrapper.appendChild(script); setStatus('Откройте Telegram и подтвердите вход.'); return;
+    }
     setError('Авторизация через ' + (labels[provider] || provider) + ' будет подключена после настройки приложения провайдера.');
+  };
+
+  window.onTelegramAuth = async function (user) {
+    try {
+      const response = await fetch('/api/auth/telegram/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(user) });
+      const data = await response.json();
+      if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
+      localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+      syncProfile(data.profile, 'external'); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
+    } catch (error) { setError(error.message); }
   };
 
   async function finishExternalLogin() {
