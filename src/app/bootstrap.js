@@ -56,6 +56,11 @@
     return target;
   }
 
+  function syncPreferences() {
+    if (typeof window.initTheme === 'function') window.initTheme();
+    if (typeof window.loadInterfacePreferences === 'function') window.loadInterfacePreferences();
+  }
+
   function bindNavigation() {
     document.querySelectorAll('#nav [data-view]').forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -65,6 +70,14 @@
         nav(target);
       });
     });
+    const profileTrigger = document.getElementById('profileTrigger');
+    if (profileTrigger && typeof window.toggleProfileMenu === 'function') {
+      profileTrigger.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.toggleProfileMenu();
+      };
+    }
   }
 
   window.setActiveView = activateView;
@@ -74,6 +87,7 @@
   function init() {
     bindNavigation();
     restoreActiveView();
+    syncPreferences();
   }
 
   if (document.readyState === 'loading') {
