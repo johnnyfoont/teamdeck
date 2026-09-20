@@ -394,3 +394,6 @@ html.auth-blocked .auth-screen{display:flex;background:#101827}html.auth-blocked
 .security-log-actions .security-status{margin-left:0}
 
 .security-select-chevron{display:block;width:8px;height:8px;flex:0 0 8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;line-height:0;transform:rotate(45deg);position:relative;top:-2px}
+
+/* Confirmation modal polish: icon and close control share the same top line. */
+.security-confirm-icon{margin-top:-10px}.security-confirm-actions .btn{transition:background .16s ease,border-color .16s ease,color .16s ease}.security-confirm-cancel:hover{background:rgba(128,142,166,.16);border-color:rgba(128,142,166,.5);color:var(--text)}.security-confirm-primary:hover{background:rgba(6,88,246,.28);border-color:rgba(92,147,255,.65);color:#c5d9ff}.security-confirm-danger:hover{background:rgba(224,82,82,.25);border-color:rgba(255,120,120,.65);color:#ffc1c1}
