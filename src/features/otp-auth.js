@@ -19,11 +19,16 @@
     if (!target) return;
     requestedEmail = prefill || '';
     codeRequested = false;
-    target.innerHTML = `<div class="field"><label for="loginUsername">E-mail</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">Одноразовый код</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">Получить код</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>Отправить новый код</button><button class="auth-link" id="demoLoginLink" type="button">Войти с логином и паролем</button>`;
+    target.innerHTML = `<div class="field"><label for="loginUsername">E-mail</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">Одноразовый код</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">Получить код</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>Отправить новый код</button><button class="auth-link" id="demoLoginLink" type="button">Войти с логином и паролем</button><div class="auth-divider"><span>или войти через</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><b>Я</b><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><b>@</b><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><b>➤</b><span>Telegram</span></button></div>`;
     target.onsubmit = event => { event.preventDefault(); codeRequested ? verifyCode() : requestCode(); };
     document.getElementById('otpResend').addEventListener('click', requestCode);
     document.getElementById('demoLoginLink').addEventListener('click', showDemoLogin);
   }
+
+  window.startExternalLogin = function (provider) {
+    const labels = { yandex: 'Яндекс', mailru: 'Mail.ru', telegram: 'Telegram' };
+    setError('Авторизация через ' + (labels[provider] || provider) + ' будет подключена после настройки приложения провайдера.');
+  };
 
   function showDemoLogin() {
     const target = form();
