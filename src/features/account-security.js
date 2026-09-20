@@ -68,8 +68,22 @@
   }
   function statusLabel(status) { return status === 'blocked' ? 'Заблокирована' : status === 'revoked' ? 'Завершена' : 'Активна'; }
 
+  function openSecurityConfirm({ title, text, actionLabel, danger, onConfirm }) {
+    document.querySelector('.security-confirm-modal')?.remove();
+    const modal = document.createElement('div'); modal.className = 'security-confirm-modal';
+    modal.innerHTML = `<div class="security-confirm-card" role="dialog" aria-modal="true" aria-labelledby="securityConfirmTitle"><div class="security-confirm-icon ${danger ? 'danger' : ''}">${danger ? '!' : '↗'}</div><div class="security-confirm-copy"><h3 id="securityConfirmTitle">${esc(title)}</h3><p>${esc(text)}</p></div><button class="security-confirm-close" aria-label="Закрыть">×</button><div class="security-confirm-actions"><button class="btn security-confirm-cancel">Отмена</button><button class="btn ${danger ? 'security-confirm-danger' : 'security-confirm-primary'}">${esc(actionLabel)}</button></div></div>`;
+    document.body.appendChild(modal); document.body.classList.add('security-confirm-open');
+    const close = () => { modal.remove(); document.body.classList.remove('security-confirm-open'); document.removeEventListener('keydown', onKey); };
+    const onKey = event => { if (event.key === 'Escape') close(); };
+    modal.addEventListener('click', event => { if (event.target === modal) close(); }); modal.querySelector('.security-confirm-close').onclick = close; modal.querySelector('.security-confirm-cancel').onclick = close;
+    modal.querySelector('.security-confirm-primary,.security-confirm-danger').onclick = () => { close(); onConfirm(); }; document.addEventListener('keydown', onKey);
+  }
   function terminate(id) {
-    const itemBefore = state().sessions.find(x => x.id === id); if (!itemBefore || itemBefore.current || !window.confirm(`Завершить сессию пользователя «${itemBefore.user}»?`)) return;
+    const itemBefore = state().sessions.find(x => x.id === id); if (!itemBefore || itemBefore.current) return;
+    openSecurityConfirm({ title: 'Завершить сессию?', text: `Сессия пользователя «${itemBefore.user}» будет завершена на этом устройстве.`, actionLabel: 'Завершить', onConfirm: () => terminateConfirmed(id) });
+  }
+  function terminateConfirmed(id) {
+    const itemBefore = state().sessions.find(x => x.id === id); if (!itemBefore) return;
     const modalWasOpen = Boolean(document.querySelector('.security-log-modal')); const modalState = { mode: modalMode, query: modalQuery, method: modalMethod, device: modalDevice, location: modalLocation, sort: modalSort };
     fetch('/api/auth/security/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity: itemBefore.identity }) }).catch(() => {});
     const s = state(); const item = s.sessions.find(x => x.id === id);
@@ -78,7 +92,9 @@
     save(s); render(); if (modalWasOpen) { window.openSecurityLogs(modalState.mode); modalQuery = modalState.query; modalMethod = modalState.method; modalDevice = modalState.device; modalLocation = modalState.location; modalSort = modalState.sort; renderModal(); }
   }
   function block(identity) {
-    if (!window.confirm(`Заблокировать пользователя «${identity}»?`)) return;
+    openSecurityConfirm({ title: 'Заблокировать пользователя?', text: `Пользователь «${identity}» не сможет войти снова с этим идентификатором.`, actionLabel: 'Заблокировать', danger: true, onConfirm: () => blockConfirmed(identity) });
+  }
+  function blockConfirmed(identity) {
     const modalWasOpen = Boolean(document.querySelector('.security-log-modal')); const modalState = { mode: modalMode, query: modalQuery, method: modalMethod, device: modalDevice, location: modalLocation, sort: modalSort };
     const s = state();
     if (!s.blocked.includes(identity)) s.blocked.push(identity);
