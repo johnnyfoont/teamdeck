@@ -70,16 +70,17 @@
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'otp'); localStorage.setItem('teamdeck-auth-email', data.email); localStorage.setItem('teamdeck-active-view', 'dashboard');
       if (data.profile) localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       else localStorage.removeItem('teamdeck-auth-profile');
-      syncProfile(data.profile || { name: data.email });
+      syncProfile(data.profile || { name: data.email }, 'otp');
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
     } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; setError(error.message); }
   }
 
-  function syncProfile(profile) {
+  function syncProfile(profile, mode = isOtpSession() ? 'otp' : 'demo') {
     const name = profile?.name || savedEmail() || 'Евгений Шумов';
     const picture = profile?.picture || 'assets/profile/default-avatar.svg';
     document.querySelectorAll('#profileTrigger b, #profileMenu .profile-menu-head b').forEach(node => { node.textContent = name; });
     document.querySelectorAll('#profileTrigger img').forEach(node => { node.src = picture; node.alt = name; });
+    document.querySelectorAll('#profileTrigger small, #profileMenu .profile-menu-head small').forEach(node => { node.textContent = mode === 'demo' ? 'CEO' : ''; node.style.display = mode === 'demo' ? '' : 'none'; });
   }
 
   const originalLogout = window.logoutUser;
@@ -93,7 +94,7 @@
       localStorage.setItem('teamdeck-auth-method', 'demo');
     }
     if (typeof originalLogin === 'function') originalLogin();
-    if (username === 'demo' && password === 'demo') syncProfile(demoProfile);
+    if (username === 'demo' && password === 'demo') syncProfile(demoProfile, 'demo');
   };
   window.logoutUser = function () {
     const email = localStorage.getItem('teamdeck-auth-email') || '';
@@ -102,11 +103,11 @@
     localStorage.removeItem('teamdeck-auth-method');
     localStorage.removeItem('teamdeck-auth-email');
     renderOtpForm(email);
-    syncProfile(demoProfile);
+    syncProfile(demoProfile, 'demo');
   };
 
   window.initOtpAuth = renderOtpForm;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile); });
-  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); });
+  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); }
   if (new URLSearchParams(location.search).get('gmail') === 'connected') setTimeout(() => setStatus('Gmail подключён. Теперь можно запросить код.'), 0);
 }());
