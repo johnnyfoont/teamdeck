@@ -140,6 +140,20 @@
         window.toggleProfileMenu();
       };
     }
+    const profileMenu = document.getElementById('profileMenu');
+    const profileLauncher = document.querySelector('.profile-launcher');
+    const closeProfileMenu = () => {
+      if (!profileMenu) return;
+      profileMenu.classList.remove('open');
+      profileTrigger?.classList.remove('is-open');
+      profileTrigger?.setAttribute('aria-expanded', 'false');
+    };
+    document.addEventListener('click', (event) => {
+      if (profileLauncher && !profileLauncher.contains(event.target)) closeProfileMenu();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeProfileMenu();
+    });
   }
 
   window.setActiveView = activateView;
