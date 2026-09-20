@@ -70,9 +70,9 @@
 
   function showView(view, options = {}) {
     const target = activateView(view, options.persist !== false);
-    refreshView(target);
-    if (typeof window.replayPageAnimation === 'function') window.replayPageAnimation(target);
     if (options.updateUrl !== false) syncUrl(target, options.replace ? 'replaceState' : 'pushState');
+    try { refreshView(target); } catch (error) { console.error('Teamdeck view renderer failed:', target, error); }
+    try { if (typeof window.replayPageAnimation === 'function') window.replayPageAnimation(target); } catch (error) { console.error('Teamdeck page animation failed:', target, error); }
     return target;
   }
 
