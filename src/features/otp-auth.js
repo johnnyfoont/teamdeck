@@ -159,7 +159,7 @@
     hideFloatingWidgets();
   }
   function hideFloatingWidgets() { if (!document.body.classList.contains('auth-minimal')) return; document.querySelectorAll('body *').forEach(node => { if (node.closest('.auth-screen,.auth-card,.blocked-card')) return; const style = getComputedStyle(node); const rect = node.getBoundingClientRect(); if (style.position === 'fixed' && rect.width <= 100 && rect.height <= 100 && rect.right > window.innerWidth - 120 && rect.bottom > window.innerHeight - 120) node.style.setProperty('display', 'none', 'important'); }); }
-  window.copyBlockedIdentity = function (button) { const identity = button.closest('.blocked-identity')?.querySelector('span')?.textContent || ''; navigator.clipboard?.writeText(identity).then(() => { button.classList.add('copied'); button.title = 'Скопировано'; setTimeout(() => { button.classList.remove('copied'); button.title = 'Скопировать идентификатор'; }, 1400); }).catch(() => {}); };
+  window.copyBlockedIdentity = function (button) { const identity = button.closest('.blocked-identity')?.querySelector('span')?.textContent || ''; navigator.clipboard?.writeText(identity).then(() => { const original = button.innerHTML; button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>'; button.classList.add('copied'); button.title = 'Скопировано'; setTimeout(() => { button.innerHTML = original; button.classList.remove('copied'); button.title = 'Скопировать идентификатор'; }, 1400); }).catch(() => {}); };
   function startSessionMonitor() {
     clearInterval(sessionMonitor);
     if (!isOtpSession() && !isExternalSession()) return;

@@ -376,3 +376,5 @@ body.auth-minimal .ai-fab,body.auth-minimal .floating-widget,body.auth-minimal .
 .app{display:none}
 
 html.auth-ready .auth-screen{display:flex}html.auth-logged-in .auth-screen{display:none}
+
+html.auth-blocked .auth-screen{display:flex;background:#101827}html.auth-blocked .auth-screen>.auth-card{display:none}a.btn.blocked-secondary:hover{background:rgba(6,88,246,.14)!important;border-color:rgba(6,88,246,.48)!important;color:#a9c8ff!important}
