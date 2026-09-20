@@ -374,3 +374,5 @@ body.auth-minimal .ai-fab,body.auth-minimal .floating-widget,body.auth-minimal .
 
 /* Hide the application shell until auth initialization explicitly opens it. */
 .app{display:none}
+
+html.auth-ready .auth-screen{display:flex}html.auth-logged-in .auth-screen{display:none}
