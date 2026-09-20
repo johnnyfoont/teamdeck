@@ -1,4 +1,4 @@
-import { redirect, json, appOrigin } from '../../../_lib/auth.js';
+import { redirect, json, appOrigin, normalizeEmail, sha256 } from '../../../_lib/auth.js';
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
@@ -22,6 +22,10 @@ export async function onRequestGet({ request, env }) {
       profile = JSON.parse(atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, '=')));
     } catch (_) { /* profile remains unavailable */ }
   }
-  if (profile?.email) await env.TEAMDECK_KV.put('gmail:profile', JSON.stringify({ email: profile.email, name: profile.name, picture: profile.picture }));
+  if (profile?.email) {
+    const normalizedProfile = { email: normalizeEmail(profile.email), name: profile.name || '', picture: profile.picture || '' };
+    await env.TEAMDECK_KV.put('gmail:profile', JSON.stringify(normalizedProfile));
+    await env.TEAMDECK_KV.put(`gmail:profile:${await sha256(normalizedProfile.email)}`, JSON.stringify(normalizedProfile));
+  }
   return Response.redirect(`${appOrigin(request, env)}/login?gmail=connected`, 302);
 }
