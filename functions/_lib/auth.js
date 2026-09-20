@@ -84,6 +84,11 @@ export async function recordSecurityEvent(env, request, event) {
   return record;
 }
 
+export async function isSecurityBlocked(env, identity) {
+  if (!env?.TEAMDECK_KV || !identity) return false;
+  return Boolean(await env.TEAMDECK_KV.get(`security:blocked:${await sha256(identity)}`));
+}
+
 export async function getGmailAccessToken(env) {
   const refreshToken = await env.TEAMDECK_KV.get('gmail:refresh_token');
   if (!refreshToken) throw new Error('Gmail is not connected yet');

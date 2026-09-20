@@ -64,11 +64,12 @@
       if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
-    } catch (error) { setError(error.message); }
+    } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(user?.username ? `${user.username}@telegram.local` : 'Telegram аккаунт'); else setError(error.message); }
   };
 
   async function finishExternalLogin() {
     const params = new URLSearchParams(location.search);
+    if (params.get('blocked') === '1') { showBlockedScreen(params.get('identity') || 'Yandex аккаунт'); history.replaceState({}, '', '/login'); return; }
     if (params.get('external') !== 'yandex' || !params.get('state')) return;
     try {
       const response = await fetch('/api/auth/yandex/session?state=' + encodeURIComponent(params.get('state')), { cache: 'no-store' });
@@ -82,7 +83,7 @@
       history.replaceState({}, '', '/dashboard');
       showApp(); if (typeof goHome === 'function') goHome();
       window.dispatchEvent(new Event('teamdeck:authenticated'));
-    } catch (error) { setError(error.message); }
+    } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(savedEmail() || 'Yandex аккаунт'); else setError(error.message); }
   }
 
   function showDemoLogin() {
@@ -132,7 +133,7 @@
       else localStorage.removeItem('teamdeck-auth-profile');
       syncProfile(data.profile || { name: data.email }, 'otp'); startSessionMonitor();
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
-    } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; setError(error.message); }
+    } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; if (/заблокирован/i.test(error.message)) showBlockedScreen(email); else setError(error.message); }
   }
 
   function syncProfile(profile, mode = isOtpSession() ? 'otp' : 'demo') {
@@ -146,6 +147,16 @@
     const item = document.getElementById('securityMenuItem');
     if (item) item.style.display = (!authMethod() || authMethod() === 'demo') ? '' : 'none';
   }
+  function showBlockedScreen(identity = savedEmail()) {
+    clearInterval(sessionMonitor);
+    localStorage.setItem('teamdeck-blocked-state', identity || 'blocked');
+    localStorage.removeItem('teamdeck-auth'); localStorage.removeItem('teamdeck-auth-method'); localStorage.removeItem('teamdeck-auth-profile'); localStorage.removeItem('teamdeck-auth-email');
+    const app = document.querySelector('.app'); if (app) app.style.display = 'none';
+    const screen = document.getElementById('authScreen'); if (!screen) return;
+    screen.classList.add('open', 'blocked-screen');
+    const label = String(identity || 'Ваш аккаунт').replace(/[&<>"']/g, value => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[value]));
+    screen.innerHTML = `<div class="blocked-card"><div class="blocked-mark">!</div><span class="section-kicker">ДОСТУП ОГРАНИЧЕН</span><h1>Аккаунт заблокирован</h1><p>Администратор ограничил доступ к платформе для этого идентификатора. Вход, просмотр данных и повторная авторизация недоступны.</p><div class="blocked-identity">${label}</div><div class="blocked-actions"><a class="btn primary" href="mailto:support@teamdeck.ru?subject=Запрос на разблокировку аккаунта">Написать в поддержку</a><a class="btn blocked-secondary" href="mailto:support@teamdeck.ru?subject=Вопрос по блокировке аккаунта">Связаться по e-mail</a></div><small>Укажите этот идентификатор в обращении — так поддержка быстрее найдёт запись.</small></div>`;
+  }
   function startSessionMonitor() {
     clearInterval(sessionMonitor);
     if (!isOtpSession() && !isExternalSession()) return;
@@ -155,6 +166,7 @@
       try {
         const response = await fetch('/api/auth/security/status?identity=' + encodeURIComponent(identity), { cache: 'no-store' });
         const data = await response.json();
+        if (data.blocked) { showBlockedScreen(identity); return; }
         if (data.revoked) { clearInterval(sessionMonitor); window.logoutUser(); if (typeof window.showLoginScreen === 'function') window.showLoginScreen(); }
       } catch (_) {}
     };
@@ -189,6 +201,8 @@
 
   window.initOtpAuth = renderOtpForm;
   function initOtpAuth() {
+    const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
+    if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
     renderOtpForm();
     const external = isOtpSession() || isExternalSession();

@@ -96,6 +96,7 @@
   }
   function blockConfirmed(identity) {
     const modalWasOpen = Boolean(document.querySelector('.security-log-modal')); const modalState = { mode: modalMode, query: modalQuery, method: modalMethod, device: modalDevice, location: modalLocation, sort: modalSort };
+    fetch('/api/auth/security/block', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity }) }).catch(() => {});
     const s = state();
     if (!s.blocked.includes(identity)) s.blocked.push(identity);
     s.sessions.filter(x => x.identity === identity).forEach(x => x.status = 'blocked');

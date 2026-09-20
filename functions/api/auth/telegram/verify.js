@@ -1,4 +1,4 @@
-import { json, normalizeEmail, recordSecurityEvent } from '../../../_lib/auth.js';
+import { json, normalizeEmail, recordSecurityEvent, isSecurityBlocked } from '../../../_lib/auth.js';
 
 const encoder = new TextEncoder();
 
@@ -23,6 +23,7 @@ export async function onRequestPost({ request, env }) {
   if (expected !== hash) return json({ error: 'Invalid Telegram login signature' }, 401);
   const name = [payload.first_name, payload.last_name].filter(Boolean).join(' ') || (payload.username ? `@${payload.username}` : `Telegram ${payload.id}`);
   const profile = { id: String(payload.id), name, email: normalizeEmail(payload.username ? `${payload.username}@telegram.local` : `telegram-${payload.id}@telegram.local`), picture: payload.photo_url || '', username: payload.username || '', provider: 'telegram' };
+  if (await isSecurityBlocked(env, profile.email)) return json({ error: 'Этот идентификатор заблокирован администратором' }, 403);
   await recordSecurityEvent(env, request, { user: name, identity: profile.email, method: 'Telegram' });
   return json({ profile });
 }
