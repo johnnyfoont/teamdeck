@@ -1,4 +1,4 @@
-import { json } from '../../../_lib/auth.js';
+import { json, sha256 } from '../../../_lib/auth.js';
 
 export async function onRequestGet({ env }) {
   if (!env?.TEAMDECK_KV) return json({ events: [] });
@@ -6,5 +6,11 @@ export async function onRequestGet({ env }) {
   const events = (await Promise.all((listing.keys || []).map(async ({ name }) => env.TEAMDECK_KV.get(name, 'json'))))
     .filter(Boolean)
     .sort((a, b) => String(b.time).localeCompare(String(a.time)));
+  await Promise.all(events.map(async event => {
+    if (!event.identity) return;
+    const key = await sha256(event.identity);
+    const [blocked, revoked] = await Promise.all([env.TEAMDECK_KV.get(`security:blocked:${key}`), env.TEAMDECK_KV.get(`security:revoked:${key}`)]);
+    event.status = blocked ? 'blocked' : revoked ? 'revoked' : 'active';
+  }));
   return json({ events });
 }

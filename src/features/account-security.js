@@ -139,7 +139,7 @@
       if (!events.length) return;
       const current = state(); const known = new Set(current.events.map(event => event.id || `${event.type}:${event.time}:${event.user}`));
       current.events = [...events.filter(event => !known.has(event.id || `${event.type}:${event.time}:${event.user}`)), ...current.events].sort((a, b) => String(b.time).localeCompare(String(a.time)));
-      const remoteSessions = events.filter(event => event.type === 'login' && event.status === 'active').map(event => ({ id: `remote-${event.id}`, user: event.user, identity: event.identity || event.user, method: event.method, device: event.device, location: event.location, country: event.country, countryFlag: event.countryFlag, region: event.region, lastSeen: formatTime(event.lastSeen || event.time), status: 'active' }));
+      const remoteSessions = events.filter(event => event.type === 'login').map(event => ({ id: `remote-${event.id}`, user: event.user, identity: event.identity || event.user, method: event.method, device: event.device, location: event.location, country: event.country, countryFlag: event.countryFlag, region: event.region, lastSeen: formatTime(event.lastSeen || event.time), status: event.status || 'active' }));
       current.sessions = [...remoteSessions, ...current.sessions.filter(session => !session.id.startsWith('remote-'))]; save(current); render();
     } catch (_) {}
   }
