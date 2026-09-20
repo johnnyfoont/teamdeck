@@ -1,4 +1,4 @@
-import { json, readJson, sha256 } from '../../../_lib/auth.js';
+import { json, readJson, sha256, recordSecurityEvent } from '../../../_lib/auth.js';
 
 export async function onRequestPost({ request, env }) {
   const { identity } = await readJson(request);
@@ -8,5 +8,6 @@ export async function onRequestPost({ request, env }) {
     env.TEAMDECK_KV?.delete(`security:blocked:${key}`),
     env.TEAMDECK_KV?.delete(`security:revoked:${key}`)
   ]);
+  await recordSecurityEvent(env, request, { type: 'unblock', title: 'Блокировка снята', user: identity, identity, method: 'Управление доступом', device: 'Панель безопасности' });
   return json({ ok: true });
 }
