@@ -392,3 +392,5 @@ html.auth-blocked .auth-screen{display:flex;background:#101827}html.auth-blocked
 .security-log-actions{width:100%;margin:0;justify-content:flex-start!important;text-align:left}
 
 .security-log-actions .security-status{margin-left:0}
+
+.security-select-chevron{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;line-height:18px;transform:none;position:relative;top:0}
