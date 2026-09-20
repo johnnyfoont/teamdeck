@@ -339,3 +339,6 @@ button.close,.modal .close{font-size:18px!important;font-weight:500;line-height:
 /* OTP login status */
 .otp-status{min-height:18px;margin:-2px 0 10px;color:rgba(110,120,138,.82);font-size:12px;line-height:1.4}.otp-status:empty{display:none}.auth-submit:disabled{opacity:.52;cursor:not-allowed;filter:saturate(.65)}
 .otp-code-field[hidden]{display:none!important}
+
+/* Profile identity overflow protection */
+.profile-trigger>span:not(.profile-chevron){min-width:0;max-width:calc(100% - 56px)}.profile-trigger b,.profile-menu-head b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-menu-head{min-width:0}.profile-menu-head b{max-width:100%}

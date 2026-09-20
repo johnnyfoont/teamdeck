@@ -11,10 +11,14 @@ export async function onRequestGet({ request, env }) {
   const tokens = await response.json();
   if (!response.ok || !tokens.refresh_token) return json({ error: 'Google did not return a refresh token', details: tokens.error_description || tokens.error }, 502);
   await env.TEAMDECK_KV.put('gmail:refresh_token', tokens.refresh_token);
-  const profileResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', { headers: { authorization: `Bearer ${tokens.access_token}` } });
-  if (profileResponse.ok) {
-    const profile = await profileResponse.json();
-    await env.TEAMDECK_KV.put('gmail:profile', JSON.stringify({ email: profile.email, name: profile.name, picture: profile.picture }));
+  let profile = null;
+  for (const endpoint of ['https://openidconnect.googleapis.com/v1/userinfo', 'https://www.googleapis.com/oauth2/v3/userinfo']) {
+    const profileResponse = await fetch(endpoint, { headers: { authorization: `Bearer ${tokens.access_token}` } });
+    if (profileResponse.ok) { profile = await profileResponse.json(); break; }
   }
+  if (!profile && tokens.id_token) {
+    try { profile = JSON.parse(atob(tokens.id_token.split('.')[1].replaceAll('-', '+').replaceAll('_', '/'))); } catch (_) { /* profile remains unavailable */ }
+  }
+  if (profile?.email) await env.TEAMDECK_KV.put('gmail:profile', JSON.stringify({ email: profile.email, name: profile.name, picture: profile.picture }));
   return Response.redirect(`${appOrigin(request, env)}/login?gmail=connected`, 302);
 }
