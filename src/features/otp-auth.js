@@ -27,8 +27,27 @@
 
   window.startExternalLogin = function (provider) {
     const labels = { yandex: 'Яндекс', mailru: 'Mail.ru', telegram: 'Telegram' };
+    if (provider === 'yandex') { window.location.href = '/api/auth/yandex/start'; return; }
     setError('Авторизация через ' + (labels[provider] || provider) + ' будет подключена после настройки приложения провайдера.');
   };
+
+  async function finishExternalLogin() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('external') !== 'yandex' || !params.get('state')) return;
+    try {
+      const response = await fetch('/api/auth/yandex/session?state=' + encodeURIComponent(params.get('state')), { cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось получить профиль Яндекса');
+      localStorage.setItem('teamdeck-auth', 'logged-in');
+      localStorage.setItem('teamdeck-auth-method', 'yandex');
+      localStorage.setItem('teamdeck-auth-email', data.profile.email);
+      localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+      syncProfile(data.profile, 'external');
+      history.replaceState({}, '', '/dashboard');
+      showApp(); if (typeof goHome === 'function') goHome();
+      window.dispatchEvent(new Event('teamdeck:authenticated'));
+    } catch (error) { setError(error.message); }
+  }
 
   function showDemoLogin() {
     const target = form();
@@ -112,7 +131,7 @@
   };
 
   window.initOtpAuth = renderOtpForm;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); });
-  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); finishExternalLogin(); });
+  else { renderOtpForm(); syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo'); finishExternalLogin(); }
   if (new URLSearchParams(location.search).get('gmail') === 'connected') setTimeout(() => setStatus('Gmail подключён. Теперь можно запросить код.'), 0);
 }());
