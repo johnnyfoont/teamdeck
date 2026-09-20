@@ -211,6 +211,7 @@
     renderOtpForm();
     if (localStorage.getItem('teamdeck-auth') !== 'logged-in') { document.body.classList.add('auth-minimal'); hideFloatingWidgets(); setTimeout(hideFloatingWidgets, 250); setTimeout(hideFloatingWidgets, 1000); }
     const external = isOtpSession() || isExternalSession();
+    if (localStorage.getItem('teamdeck-auth') === 'logged-in') showApp();
     syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
     syncSecurityMenu();
     startSessionMonitor();
