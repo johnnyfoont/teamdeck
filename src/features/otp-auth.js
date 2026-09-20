@@ -3,7 +3,7 @@
 
   let requestedEmail = '';
   let codeRequested = false;
-  const DEMO_SESSION_VERSION = '2026-09-20-reset-1';
+  const DEMO_SESSION_VERSION = '2026-09-20-reset-3';
 
   function form() { return document.querySelector('.auth-form'); }
   function errorNode() { return document.getElementById('authError'); }
