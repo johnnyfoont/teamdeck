@@ -43,12 +43,26 @@ export function clearCookie(name) {
   return `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 }
 
+const countryNames = { RU: 'Россия', BY: 'Беларусь', KZ: 'Казахстан', AM: 'Армения', AZ: 'Азербайджан', KG: 'Кыргызстан', MD: 'Молдова', TJ: 'Таджикистан', TM: 'Туркменистан', UZ: 'Узбекистан', UA: 'Украина', DE: 'Германия', FR: 'Франция', GB: 'Великобритания', IT: 'Италия', ES: 'Испания', PL: 'Польша', NL: 'Нидерланды', US: 'США', CA: 'Канада', MX: 'Мексика', BR: 'Бразилия', AR: 'Аргентина', CN: 'Китай', JP: 'Япония', KR: 'Южная Корея', IN: 'Индия', TR: 'Турция', IL: 'Израиль', AE: 'ОАЭ', AU: 'Австралия', NZ: 'Новая Зеландия' };
+const cisCodes = new Set(['RU', 'BY', 'KZ', 'AM', 'AZ', 'KG', 'MD', 'TJ', 'TM', 'UZ', 'UA']);
+const europeCodes = new Set(['DE', 'FR', 'GB', 'IT', 'ES', 'PL', 'NL', 'BE', 'AT', 'CH', 'CZ', 'SE', 'NO', 'FI', 'DK', 'PT', 'GR', 'RO', 'BG', 'HU', 'IE', 'IS', 'EE', 'LV', 'LT', 'HR', 'RS', 'SI', 'SK']);
+const asiaCodes = new Set(['CN', 'JP', 'KR', 'IN', 'TR', 'IL', 'AE', 'SA', 'TH', 'VN', 'SG', 'ID', 'MY', 'PH', 'PK', 'BD', 'IR', 'IQ', 'GE', 'MN']);
+const americaCodes = new Set(['US', 'CA', 'MX', 'BR', 'AR', 'CL', 'CO', 'PE', 'UY', 'EC', 'BO', 'CR', 'PA']);
+const oceaniaCodes = new Set(['AU', 'NZ', 'FJ', 'PG']);
+function countryInfo(value) {
+  const code = String(value || '').toUpperCase().slice(0, 2);
+  const name = countryNames[code] || (code ? code : 'Неизвестная страна');
+  const flag = /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map(char => 127397 + char.charCodeAt(0))) : '🌐';
+  const region = cisCodes.has(code) ? 'Россия и СНГ' : europeCodes.has(code) ? 'Европа' : asiaCodes.has(code) ? 'Азия' : americaCodes.has(code) ? 'Америка' : oceaniaCodes.has(code) ? 'Океания' : 'Неизвестный регион';
+  return { code, name, flag, region, label: `${flag} ${name}` };
+}
+
 export async function recordSecurityEvent(env, request, event) {
   if (!env?.TEAMDECK_KV) return null;
   const now = new Date();
   const id = crypto.randomUUID();
   const userAgent = request.headers.get('user-agent') || 'Неизвестное устройство';
-  const country = request.headers.get('cf-ipcountry') || 'Неизвестный регион';
+  const country = countryInfo(request.headers.get('cf-ipcountry'));
   const record = {
     id,
     type: event.type || 'login',
@@ -57,9 +71,12 @@ export async function recordSecurityEvent(env, request, event) {
     identity: event.identity || event.user || '',
     method: event.method || 'Неизвестный способ',
     time: now.toISOString(),
-    meta: `${event.device || userAgent} · ${country}`,
+    meta: `${event.device || userAgent} · ${country.label}`,
     device: event.device || userAgent,
-    location: country,
+    location: country.label,
+    country: country.name,
+    countryFlag: country.flag,
+    region: country.region,
     lastSeen: now.toISOString(),
     status: 'active'
   };
