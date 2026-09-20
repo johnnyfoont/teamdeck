@@ -9,5 +9,3 @@ export async function onRequestGet({ request, env }) {
   url.search = new URLSearchParams({ response_type: 'code', client_id: env.YANDEX_CLIENT_ID, redirect_uri: redirectUri, state }).toString();
   return redirect(url.toString());
 }
-EOF
-
