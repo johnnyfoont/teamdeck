@@ -154,6 +154,7 @@
 
   window.openSecurityCenter = openPage;
   window.renderSecurity = render;
+  window.addEventListener('teamdeck:authenticated', () => { remoteLoaded = false; render(); });
   window.securityTerminate = terminate;
   window.securityBlock = block;
   window.securityUnblock = unblock;
