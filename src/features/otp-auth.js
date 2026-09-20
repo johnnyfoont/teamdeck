@@ -12,7 +12,9 @@
   function setStatus(message) { const node = statusNode(); if (node) node.textContent = message || ''; }
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
-  function isOtpSession() { return localStorage.getItem('teamdeck-auth-method') === 'otp'; }
+  function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
+  function isOtpSession() { return authMethod() === 'otp'; }
+  function isExternalSession() { return ['telegram', 'yandex', 'mailru', 'external'].includes(authMethod()); }
   const demoProfile = { name: 'Шумов Евгений', picture: 'assets/profile/evgeny-shumov.jpg' };
 
   function invalidateOldDemoSession() {
@@ -139,6 +141,10 @@
     document.querySelectorAll('#profileTrigger img').forEach(node => { node.src = picture; node.alt = name; });
     document.querySelectorAll('#profileTrigger small, #profileMenu .profile-menu-head small').forEach(node => { node.textContent = mode === 'demo' ? 'CEO' : ''; node.style.display = mode === 'demo' ? '' : 'none'; });
   }
+  function syncSecurityMenu() {
+    const item = document.getElementById('securityMenuItem');
+    if (item) item.style.display = (!authMethod() || authMethod() === 'demo') ? '' : 'none';
+  }
 
   const originalLogout = window.logoutUser;
   const originalLogin = window.loginUser;
@@ -168,7 +174,9 @@
   function initOtpAuth() {
     const invalidated = invalidateOldDemoSession();
     renderOtpForm();
-    syncProfile(isOtpSession() ? (savedProfile() || { name: savedEmail() }) : demoProfile, isOtpSession() ? 'otp' : 'demo');
+    const external = isOtpSession() || isExternalSession();
+    syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
+    syncSecurityMenu();
     if (invalidated && typeof window.showLoginScreen === 'function') window.showLoginScreen();
     finishExternalLogin();
   }
