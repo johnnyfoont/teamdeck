@@ -311,3 +311,20 @@ button.close,.modal .close{font-size:18px!important;font-weight:500;line-height:
 .org-branches:before{left:calc((100% - 28px) / 6);right:calc((100% - 28px) / 6)}
 .org-branches>.department-card:not(.root):before{top:-14px;height:14px}
 .org-branches>.department-card:nth-child(-n+3):before{top:-26px;height:25px}
+
+/* Department actions and drag-and-drop preview */
+.department-card{padding-right:92px}
+.department-card[draggable="true"]{cursor:grab}
+.department-card.is-dragging{opacity:.5;cursor:grabbing}
+.department-card.is-drag-over{border-color:rgba(6,88,246,.72);background:rgba(6,88,246,.08)}
+.department-copy{min-width:0}
+.department-actions{position:absolute;right:10px;top:10px;display:flex;gap:4px;align-items:center}
+.department-actions button{display:grid;place-items:center;width:25px;height:25px;padding:0;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);font:600 14px/1 inherit;cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease}
+.department-actions button:hover{background:rgba(6,88,246,.12);border-color:rgba(6,88,246,.35);color:var(--text)}
+.department-actions .department-move{cursor:grab;font-size:15px;letter-spacing:-2px}
+.department-actions .department-delete:hover{background:rgba(220,68,78,.14);border-color:rgba(220,68,78,.4);color:#ff8f98}
+.department-card.root{padding-right:15px}
+@media(max-width:700px){.department-card{padding-right:72px}.department-actions{right:8px}.department-actions button{width:24px;height:24px}}
+
+/* Platform performance ranking */
+.platform-rating-card{margin-top:18px}.platform-rating-table th:nth-child(1){min-width:180px}.platform-rating-table th:nth-child(4),.platform-rating-table th:nth-child(6){min-width:170px}.platform-rating-table td strong{font-weight:800;color:var(--text)}.platform-rank{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:9px;border-radius:7px;background:rgba(6,88,246,.12);color:var(--brand);font-size:11px}.platform-rating-table tbody tr:first-child .platform-rank{background:rgba(245,190,58,.18);color:#c48a00}.dark .platform-rank{background:rgba(78,139,255,.18);color:#9fc0ff}.dark .platform-rating-table tbody tr:first-child .platform-rank{background:rgba(245,190,58,.2);color:#f5d78a}@media(max-width:1000px){.platform-rating-table{min-width:860px}}

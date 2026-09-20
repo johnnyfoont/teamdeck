@@ -8,4 +8,5 @@ function renderPipeline(){document.getElementById('kanban').innerHTML=stages.map
 
 
 function renderAnalyticsVacancies(rows){const body=document.getElementById('analyticsVacancyBody');if(!body)return;body.innerHTML=rows.map(r=>`<tr><td><b>${r[0]}</b><div class="mini">${r[1]}</div></td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td><span class="badge ${r[7]}">${r[6]}</span></td></tr>`).join('')}
+function renderAnalyticsPlatforms(rows){const body=document.getElementById('analyticsPlatformBody');if(!body)return;body.innerHTML=rows.map((r,i)=>`<tr><td><b><span class="platform-rank">${i+1}</span>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td><strong>${r[3]}</strong></td><td>${r[4]}</td><td><strong>${r[5]}</strong></td><td><span class="badge ${r[7]}">${r[6]}</span></td></tr>`).join('')}
 window.resetAnalyticsFilters=resetAnalyticsFilters;
