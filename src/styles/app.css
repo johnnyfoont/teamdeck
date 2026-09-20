@@ -390,3 +390,5 @@ html.auth-blocked .auth-screen{display:flex;background:#101827}html.auth-blocked
 .security-log-actions{justify-content:flex-start}
 
 .security-log-actions{width:100%;margin:0;justify-content:flex-start!important;text-align:left}
+
+.security-log-actions .security-status{margin-left:0}
