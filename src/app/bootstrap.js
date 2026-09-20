@@ -3,9 +3,32 @@
 
   const VIEW_KEY = 'teamdeck-active-view';
   const fallbackView = 'dashboard';
+  const routes = {
+    dashboard: '/dashboard',
+    vacancies: '/vacancies',
+    candidates: '/candidates',
+    pipeline: '/pipeline',
+    onboarding: '/onboarding',
+    team: '/team',
+    offboarding: '/offboarding',
+    analytics: '/analytics',
+    integrations: '/integrations',
+    recruitment: '/recruitment',
+    settings: '/settings',
+  };
+  const viewsByPath = Object.fromEntries(Object.entries(routes).map(([view, path]) => [path, view]));
 
   function validView(view) {
     return view && document.getElementById(view) ? view : fallbackView;
+  }
+
+  function viewFromLocation() {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    return validView(viewsByPath[path] || (path === '/' ? null : fallbackView));
+  }
+
+  function pathForView(view) {
+    return routes[validView(view)] || routes[fallbackView];
   }
 
   function activateView(view, persist) {
@@ -19,15 +42,6 @@
     document.body.classList.add('app-ready');
     if (persist !== false) localStorage.setItem(VIEW_KEY, target);
     return target;
-  }
-
-  function restoreActiveView() {
-    let saved = localStorage.getItem(VIEW_KEY);
-    if (localStorage.getItem('teamdeck-team-nav-migrated') !== '1') {
-      if (saved === 'team') saved = 'recruitment';
-      localStorage.setItem('teamdeck-team-nav-migrated', '1');
-    }
-    return activateView(saved, false);
   }
 
   function refreshView(view) {
@@ -49,11 +63,33 @@
     else renderer();
   }
 
-  function nav(view) {
-    const target = activateView(view, true);
+  function syncUrl(view, mode) {
+    const url = pathForView(view);
+    if (window.location.pathname !== url) window.history[mode]({ view }, '', url);
+  }
+
+  function showView(view, options = {}) {
+    const target = activateView(view, options.persist !== false);
     refreshView(target);
     if (typeof window.replayPageAnimation === 'function') window.replayPageAnimation(target);
+    if (options.updateUrl !== false) syncUrl(target, options.replace ? 'replaceState' : 'pushState');
     return target;
+  }
+
+  function restoreActiveView() {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    let saved = viewsByPath[path] || (path === '/' ? localStorage.getItem(VIEW_KEY) : fallbackView);
+    if (localStorage.getItem('teamdeck-team-nav-migrated') !== '1') {
+      if (saved === 'team') saved = 'recruitment';
+      localStorage.setItem('teamdeck-team-nav-migrated', '1');
+    }
+    const target = showView(saved || fallbackView, { persist: true, replace: true, updateUrl: true });
+    if (path === '/' || path !== pathForView(target)) syncUrl(target, 'replaceState');
+    return target;
+  }
+
+  function nav(view) {
+    return showView(view, { persist: true, updateUrl: true });
   }
 
   function syncPreferences() {
@@ -63,12 +99,20 @@
 
   function bindNavigation() {
     document.querySelectorAll('#nav [data-view]').forEach((button) => {
+      button.onclick = null;
       button.addEventListener('click', (event) => {
         event.preventDefault();
+        event.stopPropagation();
         const target = button.dataset.view;
-        if (document.querySelector('.views.active')?.id === target) return;
+        if (document.querySelector('.views.active')?.id === target) {
+          syncUrl(target, 'replaceState');
+          return;
+        }
         nav(target);
       });
+    });
+    window.addEventListener('popstate', () => {
+      showView(viewFromLocation(), { persist: true, updateUrl: false });
     });
     const profileTrigger = document.getElementById('profileTrigger');
     if (profileTrigger && typeof window.toggleProfileMenu === 'function') {
@@ -83,6 +127,7 @@
   window.setActiveView = activateView;
   window.restoreActiveView = restoreActiveView;
   window.nav = nav;
+  window.teamdeckRoutes = routes;
 
   function init() {
     bindNavigation();
