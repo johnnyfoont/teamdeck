@@ -6,9 +6,16 @@ function base64url(value) {
   return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
+function base64(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 function rawMessage({ to, from, code }) {
   const body = `Ваш одноразовый код для входа в Teamdeck: ${code}\n\nКод действует 10 минут. Если вы не запрашивали вход, проигнорируйте это письмо.`;
-  return [`From: Teamdeck <${from}>`, `To: ${to}`, 'Subject: Код входа в Teamdeck', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset="UTF-8"', '', body].join('\r\n');
+  const subject = `=?UTF-8?B?${base64('Код входа в Teamdeck')}?=`;
+  return [`From: Teamdeck <${from}>`, `To: ${to}`, `Subject: ${subject}`, 'MIME-Version: 1.0', 'Content-Type: text/plain; charset="UTF-8"', '', body].join('\r\n');
 }
 
 export async function onRequestPost({ request, env }) {
