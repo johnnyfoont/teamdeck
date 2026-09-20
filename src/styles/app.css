@@ -335,3 +335,7 @@ button.close,.modal .close{font-size:18px!important;font-weight:500;line-height:
 .dashboard-tour-kicker{color:#0658f6}.dashboard-tour-card h2{color:#20283f}.dashboard-tour-card p{color:#5b6680}.dashboard-tour-progress{color:#6c7690}.dashboard-tour-skip,.dashboard-tour-back{color:#68748d}.dashboard-tour-skip:hover,.dashboard-tour-back:hover{background:rgba(6,88,246,.08);color:#20283f}.dashboard-tour-next{border-color:#0658f6;background:linear-gradient(135deg,#0658f6,#5148e8);box-shadow:0 7px 16px rgba(6,88,246,.2)}.dashboard-tour-next:hover{background:linear-gradient(135deg,#0b62ff,#5c54f0)}
 .dark .dashboard-tour-card{background:linear-gradient(135deg,#242b55 0%,#202738 58%,#32264f 100%);border-color:#5965a4;color:#f3f4f6;box-shadow:0 20px 54px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.08) inset}.dark .dashboard-tour-card h2{color:#f3f4f6}.dark .dashboard-tour-card p,.dark .dashboard-tour-progress{color:#c0c8d8}.dark .dashboard-tour-kicker{color:#9fc0ff}.dark .dashboard-tour-skip,.dark .dashboard-tour-back{color:#c0c8d8}.dark .dashboard-tour-skip:hover,.dark .dashboard-tour-back:hover{background:rgba(159,192,255,.12);color:#fff}
 @media(prefers-reduced-motion:reduce){.dashboard-tour-card{transition:none}}
+
+/* OTP login status */
+.otp-status{min-height:18px;margin:-2px 0 10px;color:rgba(110,120,138,.82);font-size:12px;line-height:1.4}.otp-status:empty{display:none}.auth-submit:disabled{opacity:.52;cursor:not-allowed;filter:saturate(.65)}
+.otp-code-field[hidden]{display:none!important}
