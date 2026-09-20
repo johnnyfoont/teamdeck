@@ -71,6 +71,7 @@
   function terminate(id) {
     const itemBefore = state().sessions.find(x => x.id === id); if (!itemBefore || itemBefore.current || !window.confirm(`Завершить сессию пользователя «${itemBefore.user}»?`)) return;
     const modalWasOpen = Boolean(document.querySelector('.security-log-modal')); const modalState = { mode: modalMode, query: modalQuery, method: modalMethod, device: modalDevice, location: modalLocation, sort: modalSort };
+    fetch('/api/auth/security/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identity: itemBefore.identity }) }).catch(() => {});
     const s = state(); const item = s.sessions.find(x => x.id === id);
     item.status = 'revoked'; item.lastSeen = 'Завершена сейчас';
     s.events.unshift({ id: `local-revoke-${Date.now()}`, type: 'revoke', title: 'Сессия завершена принудительно', user: item.user, method: item.method, time: new Date().toISOString(), meta: item.device });

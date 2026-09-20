@@ -3,6 +3,7 @@
 
   let requestedEmail = '';
   let codeRequested = false;
+  let sessionMonitor;
   const DEMO_SESSION_VERSION = '2026-09-20-reset-3';
 
   function form() { return document.querySelector('.auth-form'); }
@@ -62,7 +63,7 @@
       const data = await response.json();
       if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      syncProfile(data.profile, 'external'); syncSecurityMenu(); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
+      syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { setError(error.message); }
   };
 
@@ -77,7 +78,7 @@
       localStorage.setItem('teamdeck-auth-method', 'yandex');
       localStorage.setItem('teamdeck-auth-email', data.profile.email);
       localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      syncProfile(data.profile, 'external'); syncSecurityMenu();
+      syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor();
       history.replaceState({}, '', '/dashboard');
       showApp(); if (typeof goHome === 'function') goHome();
       window.dispatchEvent(new Event('teamdeck:authenticated'));
@@ -129,7 +130,7 @@
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'otp'); localStorage.setItem('teamdeck-auth-email', data.email); localStorage.setItem('teamdeck-active-view', 'dashboard');
       if (data.profile) localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       else localStorage.removeItem('teamdeck-auth-profile');
-      syncProfile(data.profile || { name: data.email }, 'otp');
+      syncProfile(data.profile || { name: data.email }, 'otp'); startSessionMonitor();
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
     } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; setError(error.message); }
   }
@@ -144,6 +145,20 @@
   function syncSecurityMenu() {
     const item = document.getElementById('securityMenuItem');
     if (item) item.style.display = (!authMethod() || authMethod() === 'demo') ? '' : 'none';
+  }
+  function startSessionMonitor() {
+    clearInterval(sessionMonitor);
+    if (!isOtpSession() && !isExternalSession()) return;
+    const identity = savedProfile()?.email || savedEmail();
+    if (!identity) return;
+    const check = async () => {
+      try {
+        const response = await fetch('/api/auth/security/status?identity=' + encodeURIComponent(identity), { cache: 'no-store' });
+        const data = await response.json();
+        if (data.revoked) { clearInterval(sessionMonitor); window.logoutUser(); if (typeof window.showLoginScreen === 'function') window.showLoginScreen(); }
+      } catch (_) {}
+    };
+    sessionMonitor = setInterval(check, 10000);
   }
 
   const originalLogout = window.logoutUser;
@@ -161,6 +176,7 @@
     if (username === 'demo' && password === 'demo') { syncProfile(demoProfile, 'demo'); syncSecurityMenu(); }
   };
   window.logoutUser = function () {
+    clearInterval(sessionMonitor);
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();
     localStorage.removeItem('teamdeck-auth-profile');
@@ -178,6 +194,7 @@
     const external = isOtpSession() || isExternalSession();
     syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
     syncSecurityMenu();
+    startSessionMonitor();
     if (invalidated && typeof window.showLoginScreen === 'function') window.showLoginScreen();
     finishExternalLogin();
   }
