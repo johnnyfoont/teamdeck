@@ -62,7 +62,7 @@
       const data = await response.json();
       if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      syncProfile(data.profile, 'external'); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
+      syncProfile(data.profile, 'external'); syncSecurityMenu(); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { setError(error.message); }
   };
 
@@ -77,7 +77,7 @@
       localStorage.setItem('teamdeck-auth-method', 'yandex');
       localStorage.setItem('teamdeck-auth-email', data.profile.email);
       localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      syncProfile(data.profile, 'external');
+      syncProfile(data.profile, 'external'); syncSecurityMenu();
       history.replaceState({}, '', '/dashboard');
       showApp(); if (typeof goHome === 'function') goHome();
       window.dispatchEvent(new Event('teamdeck:authenticated'));
@@ -158,7 +158,7 @@
       localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     }
     if (typeof originalLogin === 'function') originalLogin();
-    if (username === 'demo' && password === 'demo') syncProfile(demoProfile, 'demo');
+    if (username === 'demo' && password === 'demo') { syncProfile(demoProfile, 'demo'); syncSecurityMenu(); }
   };
   window.logoutUser = function () {
     const email = localStorage.getItem('teamdeck-auth-email') || '';
@@ -168,6 +168,7 @@
     localStorage.removeItem('teamdeck-auth-email');
     renderOtpForm(email);
     syncProfile(demoProfile, 'demo');
+    syncSecurityMenu();
   };
 
   window.initOtpAuth = renderOtpForm;
