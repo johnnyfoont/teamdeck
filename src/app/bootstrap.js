@@ -72,6 +72,11 @@
   }
 
   function showView(view, options = {}) {
+    const profileMenu = document.getElementById('profileMenu');
+    const profileTrigger = document.getElementById('profileTrigger');
+    profileMenu?.classList.remove('open');
+    profileTrigger?.classList.remove('is-open');
+    profileTrigger?.setAttribute('aria-expanded', 'false');
     const target = activateView(view, options.persist !== false);
     if (options.updateUrl !== false) syncUrl(target, options.replace ? 'replaceState' : 'pushState');
     try { refreshView(target); } catch (error) { console.error('Teamdeck view renderer failed:', target, error); }
