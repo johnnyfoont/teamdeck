@@ -156,7 +156,9 @@
     screen.classList.add('open', 'blocked-screen');
     const label = String(identity || 'Ваш аккаунт').replace(/[&<>"']/g, value => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[value]));
     screen.innerHTML = `<div class="blocked-card"><div class="blocked-mark">!</div><span class="section-kicker">ДОСТУП ОГРАНИЧЕН</span><h1>Аккаунт заблокирован</h1><p>Администратор ограничил доступ к платформе для этого идентификатора. Вход, просмотр данных и повторная авторизация недоступны.</p><div class="blocked-identity"><span>${label}</span><button class="blocked-copy-button" type="button" aria-label="Скопировать идентификатор" title="Скопировать идентификатор" onclick="window.copyBlockedIdentity(this)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 16V6a2 2 0 0 1 2-2h10"/></svg></button></div><div class="blocked-actions"><a class="btn primary" href="mailto:support@teamdeck.ru?subject=Запрос на разблокировку аккаунта">Написать в поддержку</a><a class="btn blocked-secondary" href="mailto:support@teamdeck.ru?subject=Вопрос по блокировке аккаунта">Связаться по e-mail</a></div><small>Укажите этот идентификатор в обращении — так поддержка быстрее найдёт запись.</small></div>`;
+    hideFloatingWidgets();
   }
+  function hideFloatingWidgets() { if (!document.body.classList.contains('auth-minimal')) return; document.querySelectorAll('body *').forEach(node => { if (node.closest('.auth-screen,.auth-card,.blocked-card')) return; const style = getComputedStyle(node); const rect = node.getBoundingClientRect(); if (style.position === 'fixed' && rect.width <= 100 && rect.height <= 100 && rect.right > window.innerWidth - 120 && rect.bottom > window.innerHeight - 120) node.style.setProperty('display', 'none', 'important'); }); }
   window.copyBlockedIdentity = function (button) { const identity = button.closest('.blocked-identity')?.querySelector('span')?.textContent || ''; navigator.clipboard?.writeText(identity).then(() => { button.classList.add('copied'); button.title = 'Скопировано'; setTimeout(() => { button.classList.remove('copied'); button.title = 'Скопировать идентификатор'; }, 1400); }).catch(() => {}); };
   function startSessionMonitor() {
     clearInterval(sessionMonitor);
@@ -207,7 +209,7 @@
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
     renderOtpForm();
-    if (localStorage.getItem('teamdeck-auth') !== 'logged-in') document.body.classList.add('auth-minimal');
+    if (localStorage.getItem('teamdeck-auth') !== 'logged-in') { document.body.classList.add('auth-minimal'); hideFloatingWidgets(); setTimeout(hideFloatingWidgets, 250); setTimeout(hideFloatingWidgets, 1000); }
     const external = isOtpSession() || isExternalSession();
     syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
     syncSecurityMenu();
