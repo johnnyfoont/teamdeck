@@ -1,4 +1,4 @@
-import { json, normalizeEmail, isEmail, sha256, randomToken, readJson, cookie } from '../../../_lib/auth.js';
+import { json, normalizeEmail, isEmail, sha256, randomToken, readJson, cookie, recordSecurityEvent } from '../../../_lib/auth.js';
 
 export async function onRequestPost({ request, env }) {
   const { email: rawEmail, code } = await readJson(request);
@@ -12,5 +12,6 @@ export async function onRequestPost({ request, env }) {
   await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
   const connectedProfile = await env.TEAMDECK_KV.get(`gmail:profile:${await sha256(email)}`, 'json');
   const profile = connectedProfile && normalizeEmail(connectedProfile.email) === email ? { name: connectedProfile.name, picture: connectedProfile.picture } : null;
+  await recordSecurityEvent(env, request, { user: email, identity: email, method: 'Одноразовый код' });
   return json({ ok: true, email, profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30) });
 }

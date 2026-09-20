@@ -1,4 +1,4 @@
-import { redirect, json, appOrigin, normalizeEmail, sha256 } from '../../../_lib/auth.js';
+import { redirect, json, appOrigin, normalizeEmail, sha256, recordSecurityEvent } from '../../../_lib/auth.js';
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
@@ -20,5 +20,6 @@ export async function onRequestGet({ request, env }) {
   const handoff = crypto.randomUUID();
   await env.TEAMDECK_KV.put(`oauth:yandex:session:${handoff}`, JSON.stringify(userProfile), { expirationTtl: 120 });
   await env.TEAMDECK_KV.put(`external:profile:${await sha256(email)}`, JSON.stringify(userProfile));
+  await recordSecurityEvent(env, request, { user: userProfile.name, identity: email, method: 'Яндекс' });
   return redirect(`${appOrigin(request, env)}/login?external=yandex&state=${encodeURIComponent(handoff)}`);
 }

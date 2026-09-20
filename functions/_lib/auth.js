@@ -43,6 +43,30 @@ export function clearCookie(name) {
   return `${name}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 }
 
+export async function recordSecurityEvent(env, request, event) {
+  if (!env?.TEAMDECK_KV) return null;
+  const now = new Date();
+  const id = crypto.randomUUID();
+  const userAgent = request.headers.get('user-agent') || 'Неизвестное устройство';
+  const country = request.headers.get('cf-ipcountry') || 'Неизвестный регион';
+  const record = {
+    id,
+    type: event.type || 'login',
+    title: event.title || 'Вход выполнен',
+    user: event.user || 'Неизвестный пользователь',
+    identity: event.identity || event.user || '',
+    method: event.method || 'Неизвестный способ',
+    time: now.toISOString(),
+    meta: `${event.device || userAgent} · ${country}`,
+    device: event.device || userAgent,
+    location: country,
+    lastSeen: now.toISOString(),
+    status: 'active'
+  };
+  await env.TEAMDECK_KV.put(`security:event:${now.getTime()}:${id}`, JSON.stringify(record), { expirationTtl: 60 * 60 * 24 * 365 });
+  return record;
+}
+
 export async function getGmailAccessToken(env) {
   const refreshToken = await env.TEAMDECK_KV.get('gmail:refresh_token');
   if (!refreshToken) throw new Error('Gmail is not connected yet');
