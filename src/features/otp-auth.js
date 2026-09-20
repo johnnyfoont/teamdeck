@@ -81,6 +81,17 @@
   }
 
   const originalLogout = window.logoutUser;
+  const originalLogin = window.loginUser;
+  window.loginUser = function () {
+    const username = document.getElementById('loginUsername')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value || '';
+    if (username === 'demo' && password === 'demo') {
+      localStorage.removeItem('teamdeck-auth-profile');
+      localStorage.removeItem('teamdeck-auth-email');
+    }
+    if (typeof originalLogin === 'function') originalLogin();
+    if (username === 'demo' && password === 'demo') syncProfile({ name: 'Евгений Шумов' });
+  };
   window.logoutUser = function () {
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();

@@ -9,8 +9,8 @@ export async function onRequestGet({ request, env }) {
   const body = new URLSearchParams({ code, client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, redirect_uri: `${appOrigin(request, env)}/api/auth/gmail/callback`, grant_type: 'authorization_code' });
   const response = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
   const tokens = await response.json();
-  if (!response.ok || !tokens.refresh_token) return json({ error: 'Google did not return a refresh token', details: tokens.error_description || tokens.error }, 502);
-  await env.TEAMDECK_KV.put('gmail:refresh_token', tokens.refresh_token);
+  if (!response.ok || !tokens.access_token) return json({ error: 'Google did not return an access token', details: tokens.error_description || tokens.error }, 502);
+  if (tokens.refresh_token) await env.TEAMDECK_KV.put('gmail:refresh_token', tokens.refresh_token);
   let profile = null;
   for (const endpoint of ['https://openidconnect.googleapis.com/v1/userinfo', 'https://www.googleapis.com/oauth2/v3/userinfo']) {
     const profileResponse = await fetch(endpoint, { headers: { authorization: `Bearer ${tokens.access_token}` } });
