@@ -33,6 +33,7 @@
   function renderOtpForm(prefill = savedEmail()) {
     const target = form();
     if (!target) return;
+    document.documentElement.classList.remove('auth-bootstrap-pending');
     requestedEmail = prefill || '';
     codeRequested = false;
     target.innerHTML = `<div class="field"><label for="loginUsername">E-mail</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">Одноразовый код</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">Получить код</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>Отправить новый код</button><button class="auth-link" id="demoLoginLink" type="button">Войти с логином и паролем</button><div class="auth-divider"><span>или войти через</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><img src="assets/auth/yandex.png" alt="Яндекс"><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><img src="assets/auth/mailru.png" alt="Mail.ru"><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><img src="assets/auth/telegram.png" alt="Telegram"><span>Telegram</span></button></div>`;
@@ -90,6 +91,7 @@
   function showDemoLogin() {
     const target = form();
     if (!target) return;
+    document.documentElement.classList.remove('auth-bootstrap-pending');
     target.innerHTML = `<div class="field"><label for="loginUsername">Логин</label><input class="input" id="loginUsername" autocomplete="username" placeholder="Введите логин"></div><div class="field"><label for="loginPassword">Пароль</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="Введите пароль"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" type="submit">Войти</button><button class="auth-link" id="otpLoginLink" type="button">Войти по e-mail и коду</button>`;
     target.onsubmit = event => { event.preventDefault(); if (typeof window.loginUser === 'function') window.loginUser(); };
     document.getElementById('otpLoginLink').addEventListener('click', () => renderOtpForm(savedEmail()));
@@ -149,6 +151,7 @@
     if (item) item.style.display = (!authMethod() || authMethod() === 'demo') ? '' : 'none';
   }
   function showBlockedScreen(identity = savedEmail()) {
+    document.documentElement.classList.remove('auth-bootstrap-pending');
     clearInterval(sessionMonitor); clearInterval(blockedMonitor); document.body.classList.add('auth-minimal');
     localStorage.setItem('teamdeck-blocked-state', identity || 'blocked');
     localStorage.removeItem('teamdeck-auth'); localStorage.removeItem('teamdeck-auth-method'); localStorage.removeItem('teamdeck-auth-profile'); localStorage.removeItem('teamdeck-auth-email');

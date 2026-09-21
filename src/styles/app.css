@@ -423,3 +423,5 @@ html.theme-dark body{background:#111827;color:#f3f4f6}
 html.theme-dark .auth-screen .input,html.theme-dark .auth-card .input{background:#263244;color:#f3f4f6;border-color:#465267}
 html.theme-dark .auth-screen .input::placeholder{color:#8994a7}
 html.auth-ready #teamdeckAiLauncher,html.auth-blocked #teamdeckAiLauncher{display:none!important}
+/* Do not paint the legacy demo form while OTP auth replaces it. */
+html.auth-bootstrap-pending .auth-form{visibility:hidden}
