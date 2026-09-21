@@ -490,3 +490,11 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .offboarding-info-badge b{color:var(--text);font-weight:650}
 .offboarding-archive-meta{gap:7px}
 .dark .offboarding-card-status,.dark .offboarding-card-badge,.dark .offboarding-info-badge{background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.25);color:#b8c1cf}
+
+/* Offboarding pipeline cards intentionally match Onboarding: identity only; exit metadata belongs to the checklist modal. */
+.offboarding-stage-people .offboarding-person{display:flex;align-items:center;gap:9px;margin:0!important;padding:10px 8px!important;border:1px solid var(--line);border-radius:9px;background:var(--panel);min-height:0!important;height:auto!important;cursor:grab;transition:.18s}
+.offboarding-stage-people .offboarding-person:hover{border-color:#a7a1ff;transform:translateY(-1px)}
+.offboarding-stage-people .offboarding-person-avatar{width:30px;height:30px;flex:0 0 30px}
+.offboarding-stage-people .offboarding-person b{display:block;font-size:11px;line-height:1.2}
+.offboarding-stage-people .offboarding-person small{display:block;color:var(--muted);font-size:10px;line-height:1.2;margin-top:3px}
+.offboarding-profile-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:12px 0 18px}
