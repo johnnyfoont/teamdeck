@@ -530,3 +530,22 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 @media(max-width:680px){.knowledge-hero{grid-template-columns:1fr;padding:20px!important}.knowledge-hero-mark{right:8%;top:5px;font-size:90px}.knowledge-grid,.knowledge-bottom-grid{grid-template-columns:1fr}.account-page-top,.knowledge-page-top{align-items:flex-start;gap:12px}.knowledge-search{width:100%}}
 /* Keep the knowledge search area clean: no question mark or decorative semicircle. */
 .knowledge-hero:after,.knowledge-hero-mark{display:none!important}
+
+/* Shared platform dropdowns for Candidates and Analytics. */
+.platform-select{position:relative;display:inline-flex;min-width:0;vertical-align:middle}
+.platform-select>select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.platform-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:190px;height:42px;padding:0 15px;border:1px solid var(--line);border-radius:12px;background:rgba(28,43,62,.72);color:var(--text);font:inherit;font-size:14px;line-height:1;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.platform-select-trigger:hover,.platform-select.open .platform-select-trigger{background:rgba(39,59,84,.9);border-color:rgba(111,157,255,.76);color:#dce8ff}
+.platform-select-chevron{width:8px;height:8px;flex:0 0 8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);position:relative;top:-2px;opacity:.8;transition:transform .16s ease,top .16s ease}
+.platform-select.open .platform-select-chevron{transform:rotate(225deg);top:2px}
+.platform-select-menu{position:absolute;z-index:140;top:calc(100% + 7px);left:0;min-width:100%;padding:6px;border:1px solid rgba(132,157,190,.48);border-radius:14px;background:#172536;box-shadow:0 18px 45px rgba(0,0,0,.34);opacity:0;visibility:hidden;transform:translateY(-5px);transition:opacity .14s ease,transform .14s ease,visibility .14s ease}
+.platform-select.open .platform-select-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.platform-select-option{display:flex;align-items:center;gap:8px;width:100%;min-height:38px;padding:0 11px;border:0;border-radius:9px;background:transparent;color:#edf3ff;text-align:left;font:inherit;font-size:14px;white-space:nowrap;cursor:pointer;transition:background .14s ease,color .14s ease}
+.platform-select-option:hover{background:rgba(75,126,232,.28);color:#fff}
+.platform-select-option.selected{background:linear-gradient(90deg,rgba(27,91,201,.82),rgba(30,89,181,.55));color:#fff}
+.platform-select-check{display:inline-grid;place-items:center;width:14px;min-width:14px;color:#a9c7ff;font-size:15px;font-weight:700}
+.analytics-toolbar .platform-select{flex:0 1 290px}.analytics-toolbar .platform-select-trigger{width:100%}
+.searchbar .platform-select{flex:0 0 190px}.searchbar .platform-select-trigger{width:100%}
+body.dark .platform-select-trigger,.dark .platform-select-trigger{background:rgba(28,43,62,.78)}
+body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;border-color:rgba(132,157,190,.48)}
+@media(max-width:760px){.analytics-toolbar .platform-select{flex:1 1 220px}.searchbar .platform-select{flex:1 1 190px}}
