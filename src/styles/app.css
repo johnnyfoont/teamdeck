@@ -457,3 +457,15 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .department-modal-delete:hover{background:rgba(220,68,78,.14);border-color:rgba(220,68,78,.42);color:#ff8f98}
 .department-modal-tools>.close{flex:0 0 34px;width:34px;height:34px;margin:0}
 @media(max-width:700px){.department-modal-tools{gap:5px}.department-modal-action,.department-modal-tools>.close{flex-basis:32px;width:32px;height:32px}}
+
+/* Employee profile contact menu: match candidate profile and open upward. */
+.employee-contact-wrap{position:relative;display:inline-flex}
+.employee-contact-menu{left:auto;right:0;top:auto;bottom:calc(100% + 8px);min-width:238px;padding:10px;gap:4px;border-radius:12px;background:var(--panel);box-shadow:0 14px 34px rgba(0,0,0,.22)}
+.employee-contact-item{min-height:48px;padding:10px 12px;gap:12px;border-radius:8px;font-size:15px;transition:background .16s ease,color .16s ease}
+.employee-contact-item:hover{background:rgba(128,140,160,.12);color:var(--text)}
+.employee-contact-item-icon{width:32px;height:32px;min-width:32px;border-radius:50%;display:grid;place-items:center;background:rgba(6,88,246,.85);color:#fff;font-size:16px}
+.employee-contact-item span:nth-child(2){display:grid;gap:2px;min-width:0}
+.employee-contact-item b{font-size:15px}
+.employee-contact-item small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-detail>.employee-status{justify-self:start;width:auto;align-self:start}
+@media(max-width:700px){.employee-contact-menu{right:0;min-width:224px}}
