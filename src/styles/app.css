@@ -446,3 +446,14 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .views.active #candBody tr:nth-child(7){animation-delay:.48s}
 .views.active #candBody tr:nth-child(8){animation-delay:.56s}
 @media(prefers-reduced-motion:reduce){.views.active #candBody tr{animation-duration:.01ms!important;animation-delay:0!important}}
+
+/* Department actions live in the department modal header. */
+.department-card{padding-right:15px}
+.department-modal-head{align-items:flex-start}
+.department-modal-tools{display:flex;align-items:flex-start;gap:7px;margin-left:auto}
+.department-modal-action{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;transition:background .16s ease,color .16s ease,border-color .16s ease}
+.department-modal-action svg{width:16px;height:16px}
+.department-modal-move:hover{background:rgba(6,88,246,.10);border-color:rgba(6,88,246,.35);color:var(--text)}
+.department-modal-delete:hover{background:rgba(220,68,78,.14);border-color:rgba(220,68,78,.42);color:#ff8f98}
+.department-modal-tools>.close{flex:0 0 34px;width:34px;height:34px;margin:0}
+@media(max-width:700px){.department-modal-tools{gap:5px}.department-modal-action,.department-modal-tools>.close{flex-basis:32px;width:32px;height:32px}}
