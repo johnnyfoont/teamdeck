@@ -16,6 +16,8 @@
     integrations: '/integrations',
     recruitment: '/recruitment',
     settings: '/settings',
+    'account-settings': '/account-settings',
+    'knowledge-base': '/knowledge-base',
     security: '/security',
   };
   const viewsByPath = Object.fromEntries(Object.entries(routes).map(([view, path]) => [path, view]));
@@ -58,6 +60,8 @@
       team: 'renderCompanyTeam',
       analytics: 'updateAnalytics',
       settings: 'renderSettings',
+      'account-settings': 'renderAccountSettings',
+      'knowledge-base': 'renderKnowledgeBase',
       security: 'renderSecurity',
     };
     const renderer = window[renderers[view]];
