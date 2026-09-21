@@ -477,3 +477,16 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .offboarding-stage-people .offboarding-person b{font-size:13px;line-height:1.2;font-weight:700}
 .offboarding-stage-people .offboarding-person small{font-size:11px;line-height:1.25;margin-top:3px}
 .offboarding-stage-people .offboarding-person em{display:block;margin-top:5px;font-size:11px;line-height:1.25;font-style:normal}
+
+/* Offboarding cards follow the compact Onboarding card pattern. */
+.offboarding-stage-people .offboarding-person{display:flex;align-items:center;gap:9px;margin:0!important;padding:10px 8px!important;border:1px solid var(--line);border-radius:9px;background:var(--panel);min-height:0!important;height:auto!important;cursor:grab;transition:.18s}
+.offboarding-stage-people .offboarding-person:hover{border-color:#a7a1ff;transform:translateY(-1px)}
+.offboarding-stage-people .offboarding-person-avatar{width:30px;height:30px;flex:0 0 30px}
+.offboarding-stage-people .offboarding-person b{display:block;font-size:11px;line-height:1.2}
+.offboarding-stage-people .offboarding-person small{display:block;color:var(--muted);font-size:10px;line-height:1.2;margin-top:3px}
+.offboarding-card-badges{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:5px}
+.offboarding-card-status,.offboarding-card-badge,.offboarding-info-badge{display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;border:1px solid rgba(128,142,166,.28);border-radius:999px;background:rgba(128,142,166,.12);color:var(--muted);font-size:10px;line-height:1.2;font-style:normal;font-weight:500;white-space:nowrap}
+.offboarding-info-badge{font-size:11px;color:var(--muted);gap:3px}
+.offboarding-info-badge b{color:var(--text);font-weight:650}
+.offboarding-archive-meta{gap:7px}
+.dark .offboarding-card-status,.dark .offboarding-card-badge,.dark .offboarding-info-badge{background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.25);color:#b8c1cf}
