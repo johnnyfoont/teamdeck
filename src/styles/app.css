@@ -435,3 +435,14 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .views.active #vacBody tr:nth-child(6){animation-delay:.40s}
 .views.active #vacBody tr:nth-child(7){animation-delay:.48s}
 @media(prefers-reduced-motion:reduce){.views.active #vacBody tr{animation-duration:.01ms!important;animation-delay:0!important}}
+
+/* Candidates table entrance animation matches Vacancies and Analytics rows. */
+.views.active #candBody tr{animation:tdSoftLine .45s ease both}
+.views.active #candBody tr:nth-child(2){animation-delay:.08s}
+.views.active #candBody tr:nth-child(3){animation-delay:.16s}
+.views.active #candBody tr:nth-child(4){animation-delay:.24s}
+.views.active #candBody tr:nth-child(5){animation-delay:.32s}
+.views.active #candBody tr:nth-child(6){animation-delay:.40s}
+.views.active #candBody tr:nth-child(7){animation-delay:.48s}
+.views.active #candBody tr:nth-child(8){animation-delay:.56s}
+@media(prefers-reduced-motion:reduce){.views.active #candBody tr{animation-duration:.01ms!important;animation-delay:0!important}}
