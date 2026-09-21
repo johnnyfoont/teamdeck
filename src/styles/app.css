@@ -469,3 +469,4 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .employee-contact-item small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .team-detail>.employee-status{justify-self:start;width:auto;align-self:start}
 @media(max-width:700px){.employee-contact-menu{right:0;min-width:224px}}
+.employee-contact-item-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
