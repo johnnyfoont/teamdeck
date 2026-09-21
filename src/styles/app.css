@@ -419,3 +419,7 @@ body.dark .offboarding-archive-card,.dark .offboarding-archive-card{background:r
 /* Apply the saved dark palette before JavaScript reaches body initialization. */
 html.theme-dark{--bg:#111827;--panel:#1f2937;--text:#f3f4f6;--muted:#aeb6c6;--line:#374151;--shadow:0 8px 28px rgba(0,0,0,.24);background:#111827;color:#f3f4f6}
 html.theme-dark body{background:#111827;color:#f3f4f6}
+/* Keep login controls and floating launcher stable during the pre-auth paint. */
+html.theme-dark .auth-screen .input,html.theme-dark .auth-card .input{background:#263244;color:#f3f4f6;border-color:#465267}
+html.theme-dark .auth-screen .input::placeholder{color:#8994a7}
+html.auth-ready #teamdeckAiLauncher,html.auth-blocked #teamdeckAiLauncher{display:none!important}
