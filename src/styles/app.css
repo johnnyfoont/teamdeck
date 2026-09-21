@@ -498,3 +498,9 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 .offboarding-stage-people .offboarding-person b{display:block;font-size:11px;line-height:1.2}
 .offboarding-stage-people .offboarding-person small{display:block;color:var(--muted);font-size:10px;line-height:1.2;margin-top:3px}
 .offboarding-profile-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:12px 0 18px}
+
+/* Offboarding cards size to their identity content, like compact kanban cards. */
+.offboarding-stage-people{display:flex!important;flex-wrap:wrap;align-items:flex-start!important;gap:10px!important}
+.offboarding-stage-people .offboarding-person{flex:0 0 auto;width:max-content;min-width:0;max-width:100%}
+.offboarding-stage-people .offboarding-person>span:last-child{min-width:0}
+@media(max-width:900px){.offboarding-stage-people .offboarding-person{max-width:100%}}
