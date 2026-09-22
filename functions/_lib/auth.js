@@ -57,11 +57,23 @@ function countryInfo(value) {
   return { code, name, flag, region, label: `${flag} ${name}` };
 }
 
+function deviceCategory(value) {
+  const text = String(value || '').toLowerCase();
+  if (/^(планшет|tablet)$/i.test(text)) return 'Планшет';
+  if (/^(смартфон|smartphone|mobile|phone)$/i.test(text)) return 'Смартфон';
+  if (/^(десктоп|desktop)$/i.test(text)) return 'Десктоп';
+  if (/ipad|tablet|android(?!.*mobile)/i.test(text)) return 'Планшет';
+  if (/iphone|android.*mobile|mobile|phone/i.test(text)) return 'Смартфон';
+  return 'Десктоп';
+}
+
 export async function recordSecurityEvent(env, request, event) {
   if (!env?.TEAMDECK_KV) return null;
   const now = new Date();
   const id = crypto.randomUUID();
   const userAgent = request.headers.get('user-agent') || 'Неизвестное устройство';
+  const reportedDevice = request.headers.get('x-teamdeck-device');
+  const device = event.device || deviceCategory(reportedDevice || userAgent);
   const country = countryInfo(request.headers.get('cf-ipcountry'));
   const record = {
     id,
@@ -71,8 +83,9 @@ export async function recordSecurityEvent(env, request, event) {
     identity: event.identity || event.user || '',
     method: event.method || 'Неизвестный способ',
     time: now.toISOString(),
-    meta: `${event.device || userAgent} · ${country.label}`,
-    device: event.device || userAgent,
+    meta: `${device} · ${country.label}`,
+    device,
+    userAgent,
     location: country.label,
     country: country.name,
     countryFlag: country.flag,

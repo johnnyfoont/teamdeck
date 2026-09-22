@@ -12,6 +12,14 @@
   function statusNode() { return document.getElementById('otpStatus'); }
   function setError(message) { const node = errorNode(); if (node) node.textContent = message || ''; }
   function setStatus(message) { const node = statusNode(); if (node) node.textContent = message || ''; }
+  function clientDeviceCategory() {
+    const ua = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    const touchPoints = Number(navigator.maxTouchPoints || 0);
+    if (/ipad|tablet/i.test(ua) || (/macintosh/i.test(ua + ' ' + platform) && touchPoints > 1)) return 'Планшет';
+    if (/iphone|android.*mobile|mobile|phone/i.test(ua)) return 'Смартфон';
+    return 'Десктоп';
+  }
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
   function loginLanguage() {
     const query = new URLSearchParams(location.search).get('lang');
@@ -98,7 +106,7 @@
 
   window.onTelegramAuth = async function (user) {
     try {
-      const response = await fetch('/api/auth/telegram/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(user) });
+      const response = await fetch('/api/auth/telegram/verify', { method: 'POST', headers: { 'content-type': 'application/json', 'x-teamdeck-device': clientDeviceCategory() }, body: JSON.stringify(user) });
       const data = await response.json();
       if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
@@ -167,7 +175,7 @@
     if (!/^\d{6}$/.test(code)) return;
     const submit = document.getElementById('otpSubmit'); submit.disabled = true; submit.textContent = loginText('Проверяем…','Checking…'); setError('');
     try {
-      const response = await fetch('/api/auth/otp/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: requestedEmail || document.getElementById('loginUsername').value, code }) });
+      const response = await fetch('/api/auth/otp/verify', { method: 'POST', headers: { 'content-type': 'application/json', 'x-teamdeck-device': clientDeviceCategory() }, body: JSON.stringify({ email: requestedEmail || document.getElementById('loginUsername').value, code }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Код не принят');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'otp'); localStorage.setItem('teamdeck-auth-email', data.email); localStorage.setItem('teamdeck-active-view', 'dashboard');
