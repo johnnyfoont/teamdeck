@@ -13,6 +13,35 @@
   function setError(message) { const node = errorNode(); if (node) node.textContent = message || ''; }
   function setStatus(message) { const node = statusNode(); if (node) node.textContent = message || ''; }
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
+  function loginLanguage() {
+    const query = new URLSearchParams(location.search).get('lang');
+    if (query === 'en' || query === 'ru') {
+      try { const current = JSON.parse(localStorage.getItem('teamdeck-interface-preferences') || '{}'); localStorage.setItem('teamdeck-interface-preferences', JSON.stringify({ ...current, language: query })); } catch (_) {}
+      return query;
+    }
+    try { return JSON.parse(localStorage.getItem('teamdeck-interface-preferences') || '{}').language === 'en' ? 'en' : 'ru'; } catch (_) { return 'ru'; }
+  }
+  function loginText(ru, en) { return loginLanguage() === 'en' ? en : ru; }
+  function loginLanguageControl() {
+    const lang = loginLanguage();
+    return `<div class="auth-language-switch" role="group" aria-label="${loginText('Язык интерфейса','Interface language')}"><button type="button" class="auth-language-option ${lang === 'ru' ? 'active' : ''}" onclick="setLoginLanguage('ru')">RU</button><button type="button" class="auth-language-option ${lang === 'en' ? 'active' : ''}" onclick="setLoginLanguage('en')">EN</button></div>`;
+  }
+  window.setLoginLanguage = function (language) {
+    const next = language === 'en' ? 'en' : 'ru';
+    try { const current = JSON.parse(localStorage.getItem('teamdeck-interface-preferences') || '{}'); localStorage.setItem('teamdeck-interface-preferences', JSON.stringify({ ...current, language: next })); } catch (_) { localStorage.setItem('teamdeck-interface-preferences', JSON.stringify({ language: next })); }
+    location.reload();
+  };
+  function applyLoginChrome() {
+    const en = loginLanguage() === 'en';
+    const screen = document.getElementById('authScreen');
+    const title = screen?.querySelector('.auth-brand h1');
+    const subtitle = screen?.querySelector('.auth-brand p');
+    const legal = screen?.querySelector('.auth-legal');
+    if (screen) screen.setAttribute('aria-label', en ? 'Sign in to Teamdeck' : 'Вход в Teamdeck');
+    if (title) title.textContent = en ? 'Sign in to Teamdeck' : 'Вход в Teamdeck';
+    if (subtitle) subtitle.textContent = en ? 'Manage hiring and your team in one place' : 'Управляйте наймом и командой в одном месте';
+    if (legal) legal.innerHTML = en ? `By continuing, you agree to the <a href="#" onclick="event.preventDefault();toast('Privacy policy will be added later')">privacy policy</a> and Teamdeck terms of use.` : `Продолжая, вы соглашаетесь с <a href="#" onclick="event.preventDefault();toast('Политика конфиденциальности будет добавлена позже')">политикой конфиденциальности</a> и условиями использования Teamdeck.`;
+  }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
   function isOtpSession() { return authMethod() === 'otp'; }
@@ -36,7 +65,8 @@
     document.documentElement.classList.remove('auth-bootstrap-pending');
     requestedEmail = prefill || '';
     codeRequested = false;
-    target.innerHTML = `<div class="field"><label for="loginUsername">E-mail</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">Одноразовый код</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 цифр"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">Получить код</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>Отправить новый код</button><button class="auth-link" id="demoLoginLink" type="button">Войти с логином и паролем</button><div class="auth-divider"><span>или войти через</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><img src="assets/auth/yandex.png" alt="Яндекс"><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><img src="assets/auth/mailru.png" alt="Mail.ru"><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><img src="assets/auth/telegram.png" alt="Telegram"><span>Telegram</span></button></div>`;
+    applyLoginChrome();
+    target.innerHTML = `${loginLanguageControl()}<div class="field"><label for="loginUsername">${loginText('E-mail','E-mail')}</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">${loginText('Одноразовый код','One-time code')}</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="${loginText('6 цифр','6 digits')}"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">${loginText('Получить код','Get code')}</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>${loginText('Отправить новый код','Send a new code')}</button><button class="auth-link" id="demoLoginLink" type="button">${loginText('Войти с логином и паролем','Sign in with username and password')}</button><div class="auth-divider"><span>${loginText('или войти через','or continue with')}</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><img src="assets/auth/yandex.png" alt="Яндекс"><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><img src="assets/auth/mailru.png" alt="Mail.ru"><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><img src="assets/auth/telegram.png" alt="Telegram"><span>Telegram</span></button></div>`;
     target.onsubmit = event => { event.preventDefault(); codeRequested ? verifyCode() : requestCode(); };
     document.getElementById('otpResend').addEventListener('click', requestCode);
     document.getElementById('demoLoginLink').addEventListener('click', showDemoLogin);
@@ -92,7 +122,8 @@
     const target = form();
     if (!target) return;
     document.documentElement.classList.remove('auth-bootstrap-pending');
-    target.innerHTML = `<div class="field"><label for="loginUsername">Логин</label><input class="input" id="loginUsername" autocomplete="username" placeholder="Введите логин"></div><div class="field"><label for="loginPassword">Пароль</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="Введите пароль"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" type="submit">Войти</button><button class="auth-link" id="otpLoginLink" type="button">Войти по e-mail и коду</button>`;
+    applyLoginChrome();
+    target.innerHTML = `${loginLanguageControl()}<div class="field"><label for="loginUsername">${loginText('Логин','Username')}</label><input class="input" id="loginUsername" autocomplete="username" placeholder="${loginText('Введите логин','Enter username')}"></div><div class="field"><label for="loginPassword">${loginText('Пароль','Password')}</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="${loginText('Введите пароль','Enter password')}"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" type="submit">${loginText('Войти','Sign in')}</button><button class="auth-link" id="otpLoginLink" type="button">${loginText('Войти по e-mail и коду','Sign in with e-mail and code')}</button>`;
     target.onsubmit = event => { event.preventDefault(); if (typeof window.loginUser === 'function') window.loginUser(); };
     document.getElementById('otpLoginLink').addEventListener('click', () => renderOtpForm(savedEmail()));
     document.getElementById('loginUsername').focus();
@@ -111,10 +142,10 @@
       document.querySelector('.otp-code-field').hidden = false;
       document.getElementById('loginCode').addEventListener('input', updateVerifyButton);
       document.getElementById('otpResend').hidden = false;
-      submit.disabled = true; submit.textContent = 'Войти';
-      setStatus('Код отправлен на почту. Он действует 10 минут.');
+      submit.disabled = true; submit.textContent = loginText('Войти','Sign in');
+      setStatus(loginText('Код отправлен на почту. Он действует 10 минут.','The code was sent to your email. It is valid for 10 minutes.'));
       document.getElementById('loginCode').focus();
-    } catch (error) { submit.disabled = false; submit.textContent = 'Получить код'; setError(error.message); }
+    } catch (error) { submit.disabled = false; submit.textContent = loginText('Получить код','Get code'); setError(error.message); }
   }
 
   function updateVerifyButton() {
@@ -126,7 +157,7 @@
   async function verifyCode() {
     const code = document.getElementById('loginCode').value.trim();
     if (!/^\d{6}$/.test(code)) return;
-    const submit = document.getElementById('otpSubmit'); submit.disabled = true; submit.textContent = 'Проверяем…'; setError('');
+    const submit = document.getElementById('otpSubmit'); submit.disabled = true; submit.textContent = loginText('Проверяем…','Checking…'); setError('');
     try {
       const response = await fetch('/api/auth/otp/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: requestedEmail || document.getElementById('loginUsername').value, code }) });
       const data = await response.json();
@@ -136,7 +167,7 @@
       else localStorage.removeItem('teamdeck-auth-profile');
       syncProfile(data.profile || { name: data.email }, 'otp'); startSessionMonitor();
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
-    } catch (error) { submit.disabled = false; submit.textContent = 'Войти'; if (/заблокирован/i.test(error.message)) showBlockedScreen(email); else setError(error.message); }
+    } catch (error) { submit.disabled = false; submit.textContent = loginText('Войти','Sign in'); if (/заблокирован/i.test(error.message)) showBlockedScreen(email); else setError(error.message); }
   }
 
   function syncProfile(profile, mode = isOtpSession() ? 'otp' : 'demo') {
