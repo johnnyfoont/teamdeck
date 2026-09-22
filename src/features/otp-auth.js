@@ -16,9 +16,9 @@
     const ua = navigator.userAgent || '';
     const platform = navigator.platform || '';
     const touchPoints = Number(navigator.maxTouchPoints || 0);
-    if (/ipad|tablet/i.test(ua) || (/macintosh/i.test(ua + ' ' + platform) && touchPoints > 1)) return 'Планшет';
-    if (/iphone|android.*mobile|mobile|phone/i.test(ua)) return 'Смартфон';
-    return 'Десктоп';
+    if (/ipad|tablet/i.test(ua) || (/macintosh/i.test(ua + ' ' + platform) && touchPoints > 1)) return 'tablet';
+    if (/iphone|android.*mobile|mobile|phone/i.test(ua)) return 'smartphone';
+    return 'desktop';
   }
   function savedEmail() { return localStorage.getItem('teamdeck-auth-email') || ''; }
   function loginLanguage() {
