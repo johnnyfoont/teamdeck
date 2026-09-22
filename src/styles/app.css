@@ -533,8 +533,8 @@ html.auth-bootstrap-pending .auth-form{visibility:hidden}
 
 /* Vacancy department dropdown matches the modal input controls. */
 .modal .platform-select[data-select-id="vdept"]{display:block;width:100%;min-width:0}
-.modal .platform-select[data-select-id="vdept"] .platform-select-trigger{box-sizing:border-box;width:100%;min-width:0;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:inherit;font-size:16px;line-height:normal}
-.modal .platform-select[data-select-id="vdept"] .platform-select-trigger:hover,.modal .platform-select[data-select-id="vdept"].open .platform-select-trigger{background:var(--panel);border-color:var(--brand);color:var(--text)}
+.modal .platform-select[data-select-id="vdept"] .platform-select-trigger{box-sizing:border-box;width:100%;min-width:0;height:44px;padding:0 12px;border:1px solid transparent;border-radius:9px;background:#263244;color:var(--text);font:inherit;font-size:16px;line-height:normal}
+.modal .platform-select[data-select-id="vdept"] .platform-select-trigger:hover,.modal .platform-select[data-select-id="vdept"].open .platform-select-trigger{background:#263244;border-color:transparent;color:var(--text)}
 
 /* Shared platform dropdowns for Candidates and Analytics. */
 .platform-select{position:relative;display:inline-flex;min-width:0;vertical-align:middle}
