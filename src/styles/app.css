@@ -579,3 +579,33 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .auth-submit{box-shadow:0 12px 28px rgba(6,88,246,.22)}
 .auth-language-switch{position:fixed;z-index:20;right:24px;bottom:22px;display:flex;align-items:center;gap:4px;margin:0;padding:4px;border:1px solid rgba(132,157,190,.22);border-radius:12px;background:rgba(23,37,54,.72);backdrop-filter:blur(12px);box-shadow:0 10px 28px rgba(0,0,0,.18)}
 @media(max-width:600px){.auth-language-switch{right:14px;bottom:14px}.auth-card{padding-left:24px;padding-right:24px}}
+
+/* iPad / tablet responsive layer: preserve desktop density while making every page touch-friendly. */
+@media (min-width:701px) and (max-width:1100px){
+  .side{width:210px;padding:18px 12px}.side .logo img{width:170px}.main,.app.sidebar-collapsed .main{margin-left:210px;padding:24px 22px}
+  .title h1{font-size:25px}.top{gap:16px}.actions{flex-wrap:wrap;justify-content:flex-end}.actions .btn{min-height:44px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.integration-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-grid,.team-lower{grid-template-columns:1fr}.team-tools{flex-wrap:wrap}.team-tools .input{max-width:none;flex:1 1 210px}
+  .table-wrap,.section:has(> .table),.bars,.company-org{overflow-x:auto;-webkit-overflow-scrolling:touch}.table{min-width:680px}.platform-rating-table{min-width:860px}
+  .formgrid{grid-template-columns:1fr 1fr}.modal{width:min(760px,calc(100vw - 44px));max-height:calc(100vh - 44px);padding:22px}.modal:has(.integration-catalog){width:calc(100vw - 44px);height:calc(100vh - 44px)}
+  .calendar{overflow-x:auto;-webkit-overflow-scrolling:touch}.calendar-grid{min-width:680px}.kanban{grid-template-columns:repeat(5,minmax(220px,1fr));overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch}.col{min-height:420px}
+  .bars .barrow{min-width:440px}.response-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vacancy-grid,.candidate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.department-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .security-grid{grid-template-columns:1fr}.security-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.security-log-toolbar{grid-template-columns:1.5fr 1fr 1fr}.security-log-table{overflow-x:auto}.security-log-table .security-log-row{min-width:920px}.security-page .security-grid>.security-panel{height:min(520px,calc(100vh - 270px))}
+  .account-settings-layout{grid-template-columns:1fr}.knowledge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.knowledge-bottom-grid{grid-template-columns:1fr 1fr}.knowledge-hero{grid-template-columns:1fr minmax(260px,.8fr)}
+  .profile{grid-template-columns:150px 1fr}.team-profile{grid-template-columns:130px 1fr}.team-profile-photo{width:130px;height:130px}.team-detail{grid-template-columns:120px 1fr}.employee-contact-menu,.contact-hover-menu{max-width:calc(100vw - 44px)}
+  button,.btn,.input,select,textarea{touch-action:manipulation}.btn,.nav button,.close{min-height:44px}.nav button{padding-top:12px;padding-bottom:12px}.sidebar-toggle{width:30px;height:30px}
+}
+/* iPad portrait: switch to the same drawer navigation used on compact screens. */
+@media (min-width:701px) and (max-width:820px){
+  .mobilebar{height:62px;position:fixed;inset:0 0 auto 0;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:13px;padding:0 18px;z-index:25}.mobilebar-title{font-size:18px;font-weight:800;color:var(--text)}.mobile-menu-toggle{width:42px;height:42px;background:rgba(128,142,166,.14);color:var(--text);border-radius:10px;font-size:21px;display:grid;place-items:center}
+  .side,.side.collapsed{position:fixed;top:0;bottom:0;left:0;width:290px;height:100vh;padding-top:22px;transform:translateX(-105%);transition:transform .22s ease;box-shadow:12px 0 30px rgba(15,20,30,.18);z-index:30}.side.mobile-open{transform:translateX(0)}.side.collapsed .logo img{width:100%;height:auto;object-fit:contain;object-position:left center}.side.collapsed .logo{padding-left:12px;padding-right:12px}.side.collapsed .nav button{font-size:14px;justify-content:flex-start;padding:12px}.side.collapsed .nav-icon{width:19px;height:19px;flex-basis:19px}.side.collapsed .nav button::after,.sidebar-toggle{display:none}.nav-scrim{position:fixed;inset:0;background:rgba(15,20,30,.42);z-index:29}.nav-scrim.open{display:block}
+  .main,.app.sidebar-collapsed .main{margin:0;padding:82px 20px 28px}.top{align-items:flex-start;gap:14px}.actions{width:100%;justify-content:flex-start}.actions .btn{flex:1 1 180px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.profile,.team-profile{grid-template-columns:1fr}.team-profile-photo{width:112px;height:112px}.modal{width:calc(100vw - 32px);max-height:calc(100vh - 32px)}.knowledge-hero{grid-template-columns:1fr}.knowledge-bottom-grid{grid-template-columns:1fr}.response-grid,.vacancy-grid,.candidate-grid,.department-grid,.team-grid{grid-template-columns:1fr 1fr}
+}
+/* Auth and blocked screens on tablets. */
+@media (min-width:701px) and (max-width:1100px){
+  .auth-screen{padding:28px 24px}.auth-card{width:min(500px,100%);padding:34px 36px 30px}.blocked-card{width:min(520px,calc(100vw - 48px));padding:34px}.auth-language-switch{right:20px;bottom:18px}
+}
+@media (min-width:701px) and (max-width:820px){.auth-screen{padding:24px 20px}.auth-card{width:min(560px,100%);max-height:calc(100vh - 80px);overflow:auto}.blocked-card{width:min(560px,calc(100vw - 40px));max-height:calc(100vh - 52px);overflow:auto}}
+/* Keep dialogs and floating controls clear of iPad safe-area insets. */
+@supports (padding: env(safe-area-inset-bottom)){
+  @media (min-width:701px) and (max-width:1100px){.modalwrap{padding:22px max(22px,env(safe-area-inset-right)) max(22px,env(safe-area-inset-bottom)) max(22px,env(safe-area-inset-left))}.toast{right:max(22px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom))}.teamdeck-ai-launcher{right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom))}}
+}
