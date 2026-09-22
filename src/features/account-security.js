@@ -54,7 +54,7 @@
   function openPage() { if (!isDemoAdmin()) { if (typeof toast === 'function') toast('Раздел доступен только главному demo-аккаунту'); return; } if (typeof nav === 'function') nav('security'); }
 
   function filterValues(items, key) { return [...new Set(items.map(item => item[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'ru')); }
-  function deviceCategory(value) { const text = String(value || '').toLowerCase(); if (/ipad|tablet|android(?!.*mobile)/i.test(text)) return 'Планшет'; if (/iphone|android.*mobile|mobile|phone/i.test(text)) return 'Смартфон'; return 'Десктоп'; }
+  function deviceCategory(value) { const text = String(value || '').toLowerCase(); if (/планшет|ipad|tablet|android(?!.*mobile)/i.test(text)) return 'Планшет'; if (/смартфон|iphone|android.*mobile|mobile|phone/i.test(text)) return 'Смартфон'; return 'Десктоп'; }
   function isCurrentSession(item) { return Boolean(item && (item.current || item.id === 'demo-current' || item.identity === 'demo' || item.lastSeen === 'Сейчас' || (item.user === 'Шумов Евгений' && /логин и пароль/i.test(String(item.method || ''))))); }
   const deviceCategories = ['Десктоп', 'Смартфон', 'Планшет'];
   const countryCatalog = { RU: ['Россия', '🇷🇺', 'Россия и СНГ'], SK: ['Словакия', '🇸🇰', 'Европа'], DE: ['Германия', '🇩🇪', 'Европа'], FR: ['Франция', '🇫🇷', 'Европа'], GB: ['Великобритания', '🇬🇧', 'Европа'], CN: ['Китай', '🇨🇳', 'Азия'], SG: ['Сингапур', '🇸🇬', 'Азия'], JP: ['Япония', '🇯🇵', 'Азия'], US: ['США', '🇺🇸', 'Америка'], CA: ['Канада', '🇨🇦', 'Америка'], AU: ['Австралия', '🇦🇺', 'Океания'] };
