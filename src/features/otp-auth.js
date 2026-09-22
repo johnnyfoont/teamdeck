@@ -24,13 +24,19 @@
   function loginText(ru, en) { return loginLanguage() === 'en' ? en : ru; }
   function loginLanguageControl() {
     const lang = loginLanguage();
-    return `<div class="auth-language-switch" role="group" aria-label="${loginText('Язык интерфейса','Interface language')}"><button type="button" class="auth-language-option ${lang === 'ru' ? 'active' : ''}" onclick="setLoginLanguage('ru')">RU</button><button type="button" class="auth-language-option ${lang === 'en' ? 'active' : ''}" onclick="setLoginLanguage('en')">EN</button></div>`;
+    return `<div id="authLanguageSwitch" class="auth-language-switch" role="group" aria-label="${loginText('Язык интерфейса','Interface language')}"><button type="button" class="auth-language-option ${lang === 'ru' ? 'active' : ''}" onclick="setLoginLanguage('ru')">RU</button><button type="button" class="auth-language-option ${lang === 'en' ? 'active' : ''}" onclick="setLoginLanguage('en')">EN</button></div>`;
   }
   window.setLoginLanguage = function (language) {
     const next = language === 'en' ? 'en' : 'ru';
     try { const current = JSON.parse(localStorage.getItem('teamdeck-interface-preferences') || '{}'); localStorage.setItem('teamdeck-interface-preferences', JSON.stringify({ ...current, language: next })); } catch (_) { localStorage.setItem('teamdeck-interface-preferences', JSON.stringify({ language: next })); }
     location.reload();
   };
+  function mountLoginLanguageControl() {
+    const screen = document.getElementById('authScreen');
+    if (!screen) return;
+    screen.querySelector('#authLanguageSwitch')?.remove();
+    screen.insertAdjacentHTML('beforeend', loginLanguageControl());
+  }
   function applyLoginChrome() {
     const en = loginLanguage() === 'en';
     const screen = document.getElementById('authScreen');
@@ -66,7 +72,8 @@
     requestedEmail = prefill || '';
     codeRequested = false;
     applyLoginChrome();
-    target.innerHTML = `${loginLanguageControl()}<div class="field"><label for="loginUsername">${loginText('E-mail','E-mail')}</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">${loginText('Одноразовый код','One-time code')}</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="${loginText('6 цифр','6 digits')}"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">${loginText('Получить код','Get code')}</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>${loginText('Отправить новый код','Send a new code')}</button><button class="auth-link" id="demoLoginLink" type="button">${loginText('Войти с логином и паролем','Sign in with username and password')}</button><div class="auth-divider"><span>${loginText('или войти через','or continue with')}</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><img src="assets/auth/yandex.png" alt="Яндекс"><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><img src="assets/auth/mailru.png" alt="Mail.ru"><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><img src="assets/auth/telegram.png" alt="Telegram"><span>Telegram</span></button></div>`;
+    mountLoginLanguageControl();
+    target.innerHTML = `<div class="field"><label for="loginUsername">${loginText('E-mail','E-mail')}</label><input class="input" id="loginUsername" type="email" autocomplete="email" placeholder="name@company.com" value="${prefill.replace(/"/g, '&quot;')}" required></div><div class="field otp-code-field" hidden><label for="loginCode">${loginText('Одноразовый код','One-time code')}</label><input class="input" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="${loginText('6 цифр','6 digits')}"></div><div class="otp-status" id="otpStatus" aria-live="polite"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" id="otpSubmit" type="submit">${loginText('Получить код','Get code')}</button><button class="auth-link otp-resend" id="otpResend" type="button" hidden>${loginText('Отправить новый код','Send a new code')}</button><button class="auth-link" id="demoLoginLink" type="button">${loginText('Войти с логином и паролем','Sign in with username and password')}</button><div class="auth-divider"><span>${loginText('или войти через','or continue with')}</span></div><div class="external-auth-grid"><button class="external-auth-btn external-auth-yandex" type="button" onclick="startExternalLogin('yandex')"><img src="assets/auth/yandex.png" alt="Яндекс"><span>Яндекс</span></button><button class="external-auth-btn external-auth-mail" type="button" onclick="startExternalLogin('mailru')"><img src="assets/auth/mailru.png" alt="Mail.ru"><span>Mail.ru</span></button><button class="external-auth-btn external-auth-telegram" type="button" onclick="startExternalLogin('telegram')"><img src="assets/auth/telegram.png" alt="Telegram"><span>Telegram</span></button></div>`;
     target.onsubmit = event => { event.preventDefault(); codeRequested ? verifyCode() : requestCode(); };
     document.getElementById('otpResend').addEventListener('click', requestCode);
     document.getElementById('demoLoginLink').addEventListener('click', showDemoLogin);
@@ -123,7 +130,8 @@
     if (!target) return;
     document.documentElement.classList.remove('auth-bootstrap-pending');
     applyLoginChrome();
-    target.innerHTML = `${loginLanguageControl()}<div class="field"><label for="loginUsername">${loginText('Логин','Username')}</label><input class="input" id="loginUsername" autocomplete="username" placeholder="${loginText('Введите логин','Enter username')}"></div><div class="field"><label for="loginPassword">${loginText('Пароль','Password')}</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="${loginText('Введите пароль','Enter password')}"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" type="submit">${loginText('Войти','Sign in')}</button><button class="auth-link" id="otpLoginLink" type="button">${loginText('Войти по e-mail и коду','Sign in with e-mail and code')}</button>`;
+    mountLoginLanguageControl();
+    target.innerHTML = `<div class="field"><label for="loginUsername">${loginText('Логин','Username')}</label><input class="input" id="loginUsername" autocomplete="username" placeholder="${loginText('Введите логин','Enter username')}"></div><div class="field"><label for="loginPassword">${loginText('Пароль','Password')}</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="${loginText('Введите пароль','Enter password')}"></div><div class="auth-error" id="authError" role="alert"></div><button class="btn primary auth-submit" type="submit">${loginText('Войти','Sign in')}</button><button class="auth-link" id="otpLoginLink" type="button">${loginText('Войти по e-mail и коду','Sign in with e-mail and code')}</button>`;
     target.onsubmit = event => { event.preventDefault(); if (typeof window.loginUser === 'function') window.loginUser(); };
     document.getElementById('otpLoginLink').addEventListener('click', () => renderOtpForm(savedEmail()));
     document.getElementById('loginUsername').focus();
