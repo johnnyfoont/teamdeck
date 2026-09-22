@@ -35,6 +35,7 @@
 
     function render(){
       const value=select.value;
+      wrap.classList.toggle('is-placeholder', !value);
       const selected=Array.from(select.options).find(o=>o.value===value)||select.options[select.selectedIndex];
       const label=wrap.querySelector('.platform-select-value');
       if(label)label.textContent=selected?selected.textContent:'';
