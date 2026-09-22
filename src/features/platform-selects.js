@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const SELECT_IDS=['candFilter','analyticsPeriod','analyticsDepartment','analyticsRecruiter'];
+  const SELECT_IDS=['candFilter','analyticsPeriod','analyticsDepartment','analyticsRecruiter','vdept'];
   let openWrap=null;
 
   function closeOpen(){
