@@ -63,7 +63,14 @@
     document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
     document.cookie = `teamdeck_cross_method=${encodeURIComponent(method || 'external')}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
     if (profile) document.cookie = `teamdeck_cross_profile=${encodeURIComponent(JSON.stringify(profile))}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
-    window.location.replace('https://demo.teamdeck.space/dashboard');
+    const params = new URLSearchParams(location.search);
+    const rawReturn = params.get('return') || '/dashboard';
+    const returnPath = rawReturn.startsWith('/') && !rawReturn.startsWith('//') ? rawReturn : '/dashboard';
+    localStorage.removeItem('teamdeck-auth');
+    localStorage.removeItem('teamdeck-auth-method');
+    localStorage.removeItem('teamdeck-auth-profile');
+    localStorage.removeItem('teamdeck-auth-email');
+    window.location.replace('https://demo.teamdeck.space' + returnPath);
   }
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
