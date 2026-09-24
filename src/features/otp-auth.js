@@ -58,8 +58,9 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
+  const isAppDomain = location.hostname === 'app.teamdeck.space';
   function setCrossDomainSession(profile, method) {
-    if (!isTeamdeckDomain || isDemoDomain) return;
+    if (!isTeamdeckDomain || isDemoDomain || isAppDomain) return;
     document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
     document.cookie = `teamdeck_cross_method=${encodeURIComponent(method || 'external')}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
     if (profile) document.cookie = `teamdeck_cross_profile=${encodeURIComponent(JSON.stringify(profile))}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
@@ -273,7 +274,7 @@
   };
   window.logoutUser = function () {
     clearInterval(sessionMonitor);
-    if (isTeamdeckDomain) { document.cookie = 'teamdeck_cross_auth=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_method=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_profile=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; }
+    if (isTeamdeckDomain && !isAppDomain) { document.cookie = 'teamdeck_cross_auth=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_method=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_profile=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; }
     document.body.classList.add('auth-minimal');
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();

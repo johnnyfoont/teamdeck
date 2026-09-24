@@ -117,6 +117,7 @@ export async function getGmailAccessToken(env) {
 export function appOrigin(request, env) {
   const origin = new URL(request.url).origin;
   const hostname = new URL(request.url).hostname;
+  if (hostname === 'app.teamdeck.space') return 'https://app.teamdeck.space';
   if (/(^|\.)teamdeck\.space$/i.test(hostname)) return 'https://login.teamdeck.space';
   return env.APP_ORIGIN || origin;
 }
