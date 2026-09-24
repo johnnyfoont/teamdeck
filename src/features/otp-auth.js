@@ -293,6 +293,7 @@
     hydrateCrossDomainSession();
     if (isAppDomain && localStorage.getItem('teamdeck-auth') !== 'logged-in') {
       const returnPath = `${location.pathname}${location.search}${location.hash}`;
+      document.cookie = 'teamdeck_login_target=app; Domain=.teamdeck.space; Path=/; Max-Age=900; Secure; SameSite=Lax';
       location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
       return;
     }
