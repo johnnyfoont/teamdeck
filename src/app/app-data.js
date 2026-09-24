@@ -4,6 +4,10 @@
   if (!isApp) return;
 
   const state = { organization: null, departments: [], employees: [], audit: [], access: null };
+  const appShell = () => document.querySelector('.app');
+  function hideAppShell() { appShell()?.style.setProperty('display', 'none', 'important'); }
+  function showAppShell() { appShell()?.style.removeProperty('display'); }
+  hideAppShell();
   const request = (path, options = {}) => fetch(path, { credentials: 'include', cache: 'no-store', ...options }).then(async response => {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) { const error = new Error(data.error || 'Не удалось загрузить данные App'); error.code = data.code; error.status = response.status; throw error; }
@@ -14,6 +18,7 @@
   function toCompanyPerson(item) { return { id: item.id, name: `${item.first_name} ${item.last_name}`, role: item.job_title || 'Сотрудник', department: item.department_name || '', manager: '', email: item.email || '', phone: item.phone || '', photo: item.avatar_url || '', status: item.status === 'active' ? 'Штатный сотрудник' : item.status, startDate: item.hired_at || '', workMode: '', source: 'App', addedAt: Date.parse(item.created_at || '') || Date.now(), serverId: item.id }; }
   function apply(data) {
     Object.assign(state, data);
+    showAppShell();
     window.teamdeckAppData = state;
     if (Array.isArray(data.departments) && typeof companyDepartments !== 'undefined') {
       companyDepartments = data.departments.map(toCompanyDepartment);
@@ -25,6 +30,7 @@
   }
   function escapeHtml(value) { return String(value || '').replace(/[&<>\"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;' }[char])); }
   function showSetupGate() {
+    hideAppShell();
     if (document.getElementById('appAccessGate')) return;
     const gate = document.createElement('section'); gate.id = 'appAccessGate'; gate.className = 'app-access-gate';
     gate.innerHTML = `<div class="app-access-card"><div class="app-access-brand">Teamdeck</div><h1>Настройте рабочее пространство</h1><p class="app-access-lead">Для App нужна организация с подтверждённым доступом. Demo-кабинет и рабочие данные разделены.</p><form id="appOrgForm"><div class="app-form-grid"><label>ИНН<input id="appOrgInn" inputmode="numeric" maxlength="12" placeholder="10 или 12 цифр" required></label><button class="btn" id="appLookupInn" type="button">Найти организацию</button><label class="wide">Название организации<input id="appOrgName" placeholder="Заполнится после поиска" required></label><label>КПП<input id="appOrgKpp" inputmode="numeric" maxlength="9"></label><label>Юридический адрес<input id="appOrgAddress"></label><label>Почта для счёта<input id="appBillingEmail" type="email" required></label><label class="wide">Тариф<select id="appPlan"></select></label></div><div id="appLookupResult" class="app-access-hint"></div><div id="appAccessError" class="app-access-error" role="alert"></div><div class="app-access-actions"><button class="btn primary" type="submit">Создать организацию и запросить счёт</button><button class="auth-link" id="appAccessLogout" type="button">Выйти</button></div></form></div>`;
@@ -49,7 +55,7 @@
   }
   async function load() { apply(await request('/api/app/bootstrap')); return state; }
   window.teamdeckApp = { state, request, load, createDepartment: data => request('/api/app/departments', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) }), createEmployee: data => request('/api/app/employees', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) }) };
-  async function start() { if (localStorage.getItem('teamdeck-auth') !== 'logged-in') return; try { await load(); } catch (error) { if (error.code === 'APP_ACCESS_REQUIRED' || error.status === 401 || error.status === 403) showSetupGate(); else console.warn('[teamdeck-app]', error.message); } }
+  async function start() { try { await load(); } catch (error) { if (error.code === 'APP_ACCESS_REQUIRED' || error.status === 401 || error.status === 403) showSetupGate(); else { hideAppShell(); console.warn('[teamdeck-app]', error.message); } } }
   window.addEventListener('teamdeck:authenticated', start);
   window.addEventListener('DOMContentLoaded', start);
 })();
