@@ -1,8 +1,7 @@
 import { getSessionUser, body, json, unauthorized, sendEmail } from '../../_lib/app.js';
+import { randomCode } from '../../_lib/auth.js';
 
 function clean(value) { return String(value || '').trim().toLowerCase(); }
-function randomCode() { return String(Math.floor(Math.random() * 1000000)).padStart(6, '0'); }
-
 export async function onRequestPost({ request, env }) {
   const auth = await getSessionUser(request, env);
   if (!auth) return unauthorized();
