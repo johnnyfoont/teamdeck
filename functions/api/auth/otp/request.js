@@ -31,7 +31,7 @@ export async function onRequestPost({ request, env }) {
     if (!message.ok) throw new Error('Gmail send failed');
   } catch (error) {
     await env.TEAMDECK_KV.delete(key);
-    return json({ error: 'Не удалось отправить письмо. Проверьте подключение Gmail.' }, 502);
+    return json({ error: 'Сессия Gmail недействительна. Переподключите Gmail и повторите попытку.', action: 'reconnect_gmail', reconnectUrl: '/api/auth/gmail/start' }, 502);
   }
   return json({ ok: true, expiresIn: 600, message: 'Код отправлен на почту' });
 }
