@@ -58,7 +58,7 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
-  const isAppDomain = location.hostname === 'app.teamdeck.space';
+  const isAppDomain = location.hostname === 'app.teamdeck.space' || /(^|\.)teamdeck-app-preview\.pages\.dev$/i.test(location.hostname);
   function setCrossDomainSession(profile, method) {
     if (!isTeamdeckDomain || isDemoDomain || isAppDomain) return;
     document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;

@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const isApp = location.hostname === 'app.teamdeck.space';
+  const isApp = location.hostname === 'app.teamdeck.space' || /(^|\.)teamdeck-app-preview\.pages\.dev$/i.test(location.hostname);
   if (!isApp) return;
 
   const state = { organization: null, departments: [], employees: [], audit: [], access: null };
