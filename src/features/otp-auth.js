@@ -56,6 +56,26 @@
     if (subtitle) subtitle.textContent = en ? 'Manage hiring and your team in one place' : 'Управляйте наймом и командой в одном месте';
     if (legal) legal.innerHTML = en ? `By continuing, you agree to the <a href="#" onclick="event.preventDefault();toast('Privacy policy will be added later')">privacy policy</a> and Teamdeck terms of use.` : `Продолжая, вы соглашаетесь с <a href="#" onclick="event.preventDefault();toast('Политика конфиденциальности будет добавлена позже')">политикой конфиденциальности</a> и условиями использования Teamdeck.`;
   }
+  const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
+  const isDemoDomain = location.hostname === 'demo.teamdeck.space';
+  function setCrossDomainSession(profile, method) {
+    if (!isTeamdeckDomain || isDemoDomain) return;
+    document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
+    document.cookie = `teamdeck_cross_method=${encodeURIComponent(method || 'external')}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
+    if (profile) document.cookie = `teamdeck_cross_profile=${encodeURIComponent(JSON.stringify(profile))}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
+    window.location.replace('https://demo.teamdeck.space/dashboard');
+  }
+  function hydrateCrossDomainSession() {
+    if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
+    const cookies = Object.fromEntries(document.cookie.split(';').map(item => item.trim().split('=').map(decodeURIComponent)).filter(pair => pair[0]));
+    if (cookies.teamdeck_cross_auth !== '1') return;
+    localStorage.setItem('teamdeck-auth', 'logged-in');
+    localStorage.setItem('teamdeck-auth-method', cookies.teamdeck_cross_method || 'external');
+    if (cookies.teamdeck_cross_profile) {
+      try { localStorage.setItem('teamdeck-auth-profile', cookies.teamdeck_cross_profile); } catch (_) {}
+    }
+    localStorage.setItem('teamdeck-active-view', 'dashboard');
+  }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
   function isOtpSession() { return authMethod() === 'otp'; }
@@ -110,7 +130,7 @@
       const data = await response.json();
       if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
+      syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); setCrossDomainSession(data.profile, 'telegram'); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(user?.username ? `${user.username}@telegram.local` : 'Telegram аккаунт'); else setError(error.message); }
   };
 
@@ -128,7 +148,7 @@
       localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor();
       history.replaceState({}, '', '/dashboard');
-      showApp(); if (typeof goHome === 'function') goHome();
+      setCrossDomainSession(data.profile, 'yandex'); showApp(); if (typeof goHome === 'function') goHome();
       window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(savedEmail() || 'Yandex аккаунт'); else setError(error.message); }
   }
@@ -182,6 +202,7 @@
       if (data.profile) localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       else localStorage.removeItem('teamdeck-auth-profile');
       syncProfile(data.profile || { name: data.email }, 'otp'); startSessionMonitor();
+      setCrossDomainSession(data.profile || { name: data.email, email: data.email }, 'otp');
       showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated')); if (typeof toast === 'function') toast('Добро пожаловать в Teamdeck');
     } catch (error) { submit.disabled = false; submit.textContent = loginText('Войти','Sign in'); if (/заблокирован/i.test(error.message)) showBlockedScreen(email); else setError(error.message); }
   }
@@ -240,10 +261,11 @@
       localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     }
     if (typeof originalLogin === 'function') originalLogin();
-    if (username === 'demo' && password === 'demo') { syncProfile(demoProfile, 'demo'); syncSecurityMenu(); }
+    if (username === 'demo' && password === 'demo') { syncProfile(demoProfile, 'demo'); syncSecurityMenu(); setCrossDomainSession(demoProfile, 'demo'); }
   };
   window.logoutUser = function () {
     clearInterval(sessionMonitor);
+    if (isTeamdeckDomain) { document.cookie = 'teamdeck_cross_auth=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_method=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; document.cookie = 'teamdeck_cross_profile=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax'; }
     document.body.classList.add('auth-minimal');
     const email = localStorage.getItem('teamdeck-auth-email') || '';
     if (typeof originalLogout === 'function') originalLogout();
@@ -257,6 +279,7 @@
 
   window.initOtpAuth = renderOtpForm;
   function initOtpAuth() {
+    hydrateCrossDomainSession();
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();

@@ -14,5 +14,5 @@ export async function onRequestPost({ request, env }) {
   const connectedProfile = await env.TEAMDECK_KV.get(`gmail:profile:${await sha256(email)}`, 'json');
   const profile = connectedProfile && normalizeEmail(connectedProfile.email) === email ? { name: connectedProfile.name, picture: connectedProfile.picture } : null;
   await recordSecurityEvent(env, request, { user: email, identity: email, method: 'Одноразовый код' });
-  return json({ ok: true, email, profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30) });
+  return json({ ok: true, email, profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
 }

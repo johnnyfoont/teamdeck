@@ -35,8 +35,10 @@ export async function readJson(request) {
   try { return await request.json(); } catch { return {}; }
 }
 
-export function cookie(name, value, maxAge) {
-  return `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+export function cookie(name, value, maxAge, request) {
+  const host = request ? new URL(request.url).hostname : '';
+  const domain = /(^|\.)teamdeck\.space$/i.test(host) ? '; Domain=.teamdeck.space' : '';
+  return `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Lax${domain}`;
 }
 
 export function clearCookie(name) {
@@ -113,5 +115,8 @@ export async function getGmailAccessToken(env) {
 }
 
 export function appOrigin(request, env) {
-  return env.APP_ORIGIN || new URL(request.url).origin;
+  const origin = new URL(request.url).origin;
+  const hostname = new URL(request.url).hostname;
+  if (/(^|\.)teamdeck\.space$/i.test(hostname)) return 'https://login.teamdeck.space';
+  return env.APP_ORIGIN || origin;
 }
