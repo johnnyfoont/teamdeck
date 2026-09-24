@@ -58,6 +58,7 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
+  function loginTargetCookie() { return document.cookie.split(';').map(item => item.trim()).find(item => item.startsWith('teamdeck_login_target='))?.split('=').slice(1).join('=') || ''; }
   function setCrossDomainSession(profile, method) {
     if (!isTeamdeckDomain || isDemoDomain) return;
     document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
@@ -66,7 +67,9 @@
     const params = new URLSearchParams(location.search);
     const rawReturn = params.get('return') || '/dashboard';
     const returnPath = rawReturn.startsWith('/') && !rawReturn.startsWith('//') ? rawReturn : '/dashboard';
-    const destination = params.get('app') === '1' ? 'https://app.teamdeck.space' : 'https://demo.teamdeck.space';
+    const target = params.get('app') === '1' || loginTargetCookie() === 'app';
+    const destination = target ? 'https://app.teamdeck.space' : 'https://demo.teamdeck.space';
+    document.cookie = 'teamdeck_login_target=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
     localStorage.removeItem('teamdeck-auth');
     localStorage.removeItem('teamdeck-auth-method');
     localStorage.removeItem('teamdeck-auth-profile');
