@@ -137,7 +137,7 @@
     try {
       const response = await fetch('/api/auth/telegram/verify', { method: 'POST', headers: { 'content-type': 'application/json', 'x-teamdeck-device': clientDeviceCategory() }, body: JSON.stringify(user) });
       const data = await response.json();
-      if (!response.ok || !data.profile) throw new Error(data.error || 'Не удалось проверить вход через Telegram');
+      if (!response.ok || !data.profile) throw new Error(data.detail || data.error || 'Не удалось проверить вход через Telegram');
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
       syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); setCrossDomainSession(data.profile, 'telegram'); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(user?.username ? `${user.username}@telegram.local` : 'Telegram аккаунт'); else if (/Telegram login data expired/i.test(error.message)) { document.getElementById('telegram-login-widget')?.remove(); setError('Срок действия данных Telegram истёк. Нажмите кнопку Telegram ещё раз.'); } else setError(error.message); }

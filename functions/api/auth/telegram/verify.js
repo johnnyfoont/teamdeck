@@ -16,7 +16,10 @@ export async function onRequestPost({ request, env }) {
   try { payload = await request.json(); } catch { return json({ error: 'Invalid request' }, 400); }
   const hash = String(payload.hash || '');
   const authDate = Number(payload.auth_date || 0);
-  if (!hash || !env.TELEGRAM_BOT_TOKEN || !authDate || Math.abs(Date.now() / 1000 - authDate) > 600) return json({ error: 'Telegram login data expired' }, 401);
+  if (!env.TELEGRAM_BOT_TOKEN) return json({ error: 'Telegram авторизация не настроена: отсутствует Bot Token.' }, 503);
+  if (!hash || !authDate) return json({ error: 'Telegram не передал данные авторизации. Запустите вход ещё раз.' }, 400);
+  const driftSeconds = Math.abs(Date.now() / 1000 - authDate);
+  if (driftSeconds > 600) return json({ error: 'Telegram login data expired', detail: 'Истёк срок действия данных Telegram. Запустите вход ещё раз.' }, 401);
   const checkString = Object.keys(payload).filter(key => key !== 'hash' && payload[key] !== undefined && payload[key] !== null).sort().map(key => `${key}=${payload[key]}`).join('\n');
   const secretKey = await sha256(env.TELEGRAM_BOT_TOKEN);
   const expected = hex(await hmac(secretKey, checkString));
