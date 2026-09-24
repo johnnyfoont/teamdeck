@@ -1,4 +1,4 @@
-import { json, normalizeEmail, recordSecurityEvent, isSecurityBlocked } from '../../../_lib/auth.js';
+import { json, normalizeEmail, recordSecurityEvent, isSecurityBlocked, randomToken, cookie } from '../../../_lib/auth.js';
 
 const encoder = new TextEncoder();
 
@@ -28,5 +28,7 @@ export async function onRequestPost({ request, env }) {
   const profile = { id: String(payload.id), name, email: normalizeEmail(payload.username ? `${payload.username}@telegram.local` : `telegram-${payload.id}@telegram.local`), picture: payload.photo_url || '', username: payload.username || '', provider: 'telegram' };
   if (await isSecurityBlocked(env, profile.email)) return json({ error: 'Этот идентификатор заблокирован администратором' }, 403);
   await recordSecurityEvent(env, request, { user: name, identity: profile.email, method: 'Telegram' });
-  return json({ profile });
+  const session = randomToken();
+  await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email: profile.email, name, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
+  return json({ profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
 }
