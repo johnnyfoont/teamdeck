@@ -71,6 +71,7 @@
     if (cookies.teamdeck_cross_auth !== '1') return;
     localStorage.setItem('teamdeck-auth', 'logged-in');
     localStorage.setItem('teamdeck-auth-method', cookies.teamdeck_cross_method || 'external');
+    if ((cookies.teamdeck_cross_method || '') === 'demo') localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     if (cookies.teamdeck_cross_profile) {
       try { localStorage.setItem('teamdeck-auth-profile', cookies.teamdeck_cross_profile); } catch (_) {}
     }
