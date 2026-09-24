@@ -291,6 +291,11 @@
   window.initOtpAuth = renderOtpForm;
   function initOtpAuth() {
     hydrateCrossDomainSession();
+    if (isAppDomain && localStorage.getItem('teamdeck-auth') !== 'logged-in') {
+      const returnPath = `${location.pathname}${location.search}${location.hash}`;
+      location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
+      return;
+    }
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
