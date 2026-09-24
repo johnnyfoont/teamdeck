@@ -66,11 +66,12 @@
     const params = new URLSearchParams(location.search);
     const rawReturn = params.get('return') || '/dashboard';
     const returnPath = rawReturn.startsWith('/') && !rawReturn.startsWith('//') ? rawReturn : '/dashboard';
+    const destination = params.get('app') === '1' ? 'https://app.teamdeck.space' : 'https://demo.teamdeck.space';
     localStorage.removeItem('teamdeck-auth');
     localStorage.removeItem('teamdeck-auth-method');
     localStorage.removeItem('teamdeck-auth-profile');
     localStorage.removeItem('teamdeck-auth-email');
-    window.location.replace('https://demo.teamdeck.space' + returnPath);
+    window.location.replace(destination + returnPath);
   }
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
