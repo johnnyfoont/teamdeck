@@ -137,7 +137,7 @@
 
   async function finishExternalLogin() {
     const params = new URLSearchParams(location.search);
-    if (params.get('blocked') === '1') { showBlockedScreen(params.get('identity') || 'Yandex аккаунт'); history.replaceState({}, '', '/login'); return; }
+    if (params.get('blocked') === '1') { showBlockedScreen(params.get('identity') || 'Yandex аккаунт'); history.replaceState({}, '', location.hostname === 'login.teamdeck.space' ? '/' : '/login'); return; }
     if (params.get('external') !== 'yandex' || !params.get('state')) return;
     try {
       const response = await fetch('/api/auth/yandex/session?state=' + encodeURIComponent(params.get('state')), { cache: 'no-store' });
