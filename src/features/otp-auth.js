@@ -215,7 +215,7 @@
         // Use an actual anchor navigation instead of window.location/window.open:
         // Safari can throw a generic DOMException for invalid navigation strings.
         const handoffUrl = String(data.redirectUrl || '');
-        if (!/^https:\/\/demo\.teamdeck\.space\/api\/auth\/telegram\/complete\?handoff=/i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
+        if (!/^https:\/\/demo\.teamdeck\.space\/\?telegram_handoff=/i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
         const handoff = new URL(handoffUrl).searchParams.get('handoff') || '';
         if (!handoff) throw new Error('Не удалось получить ключ перехода Telegram');
         // Navigate to the demo first, then complete the handoff with a same-origin
