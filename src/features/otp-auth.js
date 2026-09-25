@@ -91,6 +91,25 @@
     }
     localStorage.setItem('teamdeck-active-view', 'dashboard');
   }
+  async function completeTelegramHandoff() {
+    if (!isDemoDomain) return;
+    const params = new URLSearchParams(location.search);
+    const handoff = params.get('telegram_handoff');
+    if (!handoff) return;
+    try {
+      const response = await fetch('/api/auth/telegram/complete?handoff=' + encodeURIComponent(handoff), {
+        headers: { accept: 'application/json' },
+        credentials: 'include',
+        cache: 'no-store'
+      });
+      if (!response.ok) throw new Error('Не удалось завершить вход через Telegram');
+      history.replaceState({}, '', '/dashboard');
+    } catch (error) {
+      console.error('Telegram handoff failed:', error);
+      setError(error.message);
+    }
+  }
+
   async function hydrateServerSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
     try {
@@ -334,6 +353,7 @@
   window.initOtpAuth = renderOtpForm;
   async function initOtpAuth() {
     rememberLoginTarget();
+    await completeTelegramHandoff();
     await hydrateServerSession();
     // Server session is the single source of truth for cross-domain authentication.
     // The legacy teamdeck_cross_* cookies are intentionally ignored.
