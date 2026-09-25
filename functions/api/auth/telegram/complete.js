@@ -1,4 +1,4 @@
-import { redirect } from '../../../_lib/auth.js';
+import { json, redirect } from '../../../_lib/auth.js';
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
@@ -13,10 +13,15 @@ export async function onRequestGet({ request, env }) {
 
   await env.TEAMDECK_KV.delete(key);
 
-  // Set the session cookie on the demo host itself. This avoids relying on
-  // cross-subdomain cookie handling in Safari while preserving the same
-  // server-side KV session.
   const sessionCookie = `teamdeck_session=${encodeURIComponent(record.session)}; Max-Age=2592000; Path=/; HttpOnly; Secure; SameSite=Lax`;
+  const wantsJson = (request.headers.get('accept') || '').includes('application/json');
+
+  if (wantsJson) {
+    return json({ authenticated: true }, 200, {
+      'set-cookie': sessionCookie,
+      'cache-control': 'no-store'
+    });
+  }
 
   return new Response(null, {
     status: 302,
