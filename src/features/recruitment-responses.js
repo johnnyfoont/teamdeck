@@ -106,3 +106,5 @@ function deleteCandidate(id){const c=data.candidates.find(x=>x.id===id);if(!c)re
   if(offboardingChanged && typeof saveOffboarding==='function')saveOffboarding();
   if(companyChanged && typeof saveCompanyPeople==='function')saveCompanyPeople();
 })();
+
+window.openOffboardingStart=openOffboardingStart;
