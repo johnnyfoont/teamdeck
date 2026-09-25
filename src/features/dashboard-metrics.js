@@ -1,9 +1,13 @@
 (function () {
   'use strict';
 
+  function demoData() {
+    return typeof data !== 'undefined' && data && typeof data === 'object' ? data : null;
+  }
+
   const cards = [
-    { id: 'kpiVacancies', valueId: 'kVac', label: 'Открытые вакансии', view: 'vacancies', get: () => Array.isArray(window.data?.vacancies) ? window.data.vacancies.length : 0 },
-    { id: 'kpiCandidates', valueId: 'kCand', label: 'Всего кандидатов', view: 'candidates', get: () => Array.isArray(window.data?.candidates) ? window.data.candidates.length : 0 },
+    { id: 'kpiVacancies', valueId: 'kVac', label: 'Открытые вакансии', view: 'vacancies', get: () => Array.isArray(demoData()?.vacancies) ? demoData().vacancies.length : 0 },
+    { id: 'kpiCandidates', valueId: 'kCand', label: 'Всего кандидатов', view: 'candidates', get: () => Array.isArray(demoData()?.candidates) ? demoData().candidates.length : 0 },
     { id: 'kpiOnboarding', valueId: 'kOnboarding', label: 'Онбординг', view: 'onboarding', get: () => Array.isArray(window.onboardingPeople) ? window.onboardingPeople.length : 0 },
     { id: 'kpiOffboarding', valueId: 'kOffboarding', label: 'Оффбординг', view: 'offboarding', get: () => Array.isArray(window.offboardingPeople) ? window.offboardingPeople.length : 0 },
   ];
