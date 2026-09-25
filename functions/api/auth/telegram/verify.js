@@ -6,7 +6,7 @@ function hex(bytes) { return [...new Uint8Array(bytes)].map(b => b.toString(16).
 
 async function hmac(key, value) {
   const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(value));
+  return crypto.subtle.sign(cryptoKey, encoder.encode(value));
 }
 
 async function sha256(value) { return crypto.subtle.digest('SHA-256', encoder.encode(value)); }
@@ -30,9 +30,10 @@ export async function onRequestPost({ request, env }) {
   await recordSecurityEvent(env, request, { user: name, identity: profile.email, method: 'Telegram' });
   const session = randomToken();
   await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email: profile.email, name, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
-  // Safari can be stricter about persisting cookies from an XHR/fetch response.
-  // Create a short-lived one-time handoff that is completed by a top-level navigation.
+  // Safari-safe top-level handoff. The final response is served by demo.teamdeck.space,
+  // so the browser stores the session cookie in the destination context before loading the app.
   const handoff = randomToken();
   await env.TEAMDECK_KV.put(`telegram:handoff:${handoff}`, JSON.stringify({ session }), { expirationTtl: 60 });
-  return json({ profile, redirectUrl: `/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}` }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
+  const completeUrl = `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`;
+  return json({ profile, redirectUrl: completeUrl }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
 }
