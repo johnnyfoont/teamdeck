@@ -115,7 +115,7 @@
 
     pendingMoves.splice(0, pendingMoves.length);
     removedResponses.filter((item) => !movedResponseNames.has(item.name)).forEach((item) => {
-      addEvent('candidate', 'Отклик получил отказ', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`);
+      addEvent('rejection', 'Отклик получил отказ', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`);
     });
 
     const onboardingStages = readArray('onboardingStages');

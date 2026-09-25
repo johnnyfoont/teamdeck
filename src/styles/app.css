@@ -656,3 +656,7 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .action-history-list .action-history-event{flex:0 0 auto!important}
 .modal:has(.action-history-modal-list){width:min(920px,100%)!important;max-height:min(760px,calc(100vh - 40px))!important;overflow:hidden!important}
 .action-history-modal-list{height:auto!important;max-height:min(58vh,560px)!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:12px!important}
+
+/* Action history event palette. */
+.event-type-rejection{border-color:#ef4444!important;color:#ef4444!important;background:rgba(239,68,68,.12)!important}
+.action-history-event.is-latest.event-type-rejection{background:rgba(239,68,68,.12)!important}
