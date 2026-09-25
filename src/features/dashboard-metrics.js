@@ -44,7 +44,11 @@
   }
 
   window.updateDashboardMetrics = updateDashboardMetrics;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateDashboardMetrics, { once: true });
-  else updateDashboardMetrics();
-  window.addEventListener('load', updateDashboardMetrics, { once: true });
+  function scheduleUpdates() {
+    updateDashboardMetrics();
+    [100, 400, 1000, 1800].forEach((delay) => window.setTimeout(updateDashboardMetrics, delay));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleUpdates, { once: true });
+  else scheduleUpdates();
+  window.addEventListener('load', scheduleUpdates, { once: true });
 })();
