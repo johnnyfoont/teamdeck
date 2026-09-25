@@ -30,6 +30,22 @@
   async function load() { apply(await request('/api/app/bootstrap')); return state; }
   window.teamdeckApp = { state, request, load, createDepartment: data => request('/api/app/departments', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) }), createEmployee: data => request('/api/app/employees', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) }) };
   function showLoadError(error) { hideAppShell(); let node = document.getElementById('appLoadError'); if (!node) { node = document.createElement('section'); node.id = 'appLoadError'; node.className = 'app-load-error'; node.innerHTML = '<div><img src="assets/teamdeck-logo.png" alt="Teamdeck"><h1>Не удалось открыть рабочее пространство</h1><p></p><button class="btn primary" type="button">Повторить</button></div>'; document.body.appendChild(node); node.querySelector('button').onclick = () => { node.remove(); start(); }; } node.querySelector('p').textContent = error?.message || 'Проверьте соединение и повторите попытку.'; }
-  async function start() { try { await load(); } catch (error) { if (error.code === 'APP_ACCESS_REQUIRED' || error.status === 401 || error.status === 403) showSetupGate(); else { console.warn('[teamdeck-app]', error.message); showLoadError(error); } } }
+  async function start() {
+    try {
+      // This endpoint checks only the shared server session. A session may be
+      // valid even when the user has not created an organization yet.
+      const access = await request('/api/app/organizations');
+      state.access = access;
+      const active = (access.memberships || []).some(item => item.status === 'active' && ['draft', 'active', 'trial'].includes(item.organization_status));
+      if (!active) { showSetupGate(); return; }
+      await load();
+    } catch (error) {
+      if (error.status === 401) {
+        const returnPath = `${location.pathname}${location.search}${location.hash}`;
+        location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
+      } else if (error.code === 'APP_ACCESS_REQUIRED' || error.status === 403) showSetupGate();
+      else { console.warn('[teamdeck-app]', error.message); showLoadError(error); }
+    }
+  }
   hideAppShell(); window.addEventListener('teamdeck:authenticated', start); if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 })();

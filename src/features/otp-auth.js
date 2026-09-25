@@ -296,7 +296,10 @@
       document.cookie = 'teamdeck_login_target=app; Domain=.teamdeck.space; Path=/; Max-Age=900; Secure; SameSite=Lax';
       if (localStorage.getItem('teamdeck-auth') !== 'logged-in') {
         try {
-          const response = await fetch('/api/app/bootstrap', { credentials: 'include', cache: 'no-store' });
+          // Проверяем именно server-side сессию. Bootstrap требует уже активную
+          // организацию и поэтому не может использоваться как auth-check:
+          // новый пользователь без организации иначе ошибочно возвращается на Login.
+          const response = await fetch('/api/app/organizations', { credentials: 'include', cache: 'no-store' });
           if (response.status === 401) {
             location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
             return;
