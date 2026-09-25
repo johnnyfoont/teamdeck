@@ -619,3 +619,5 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .app-code-input{max-width:260px!important}.app-code-row{grid-template-columns:minmax(0,260px) auto!important}.app-invalid{display:inline-grid;place-items:center;width:20px;height:20px;margin-right:6px;border-radius:50%;background:#e65d6d;color:#4b101b;font-weight:800}.app-logout-btn:hover,.app-access-actions .app-logout-btn:hover{background:rgba(218,76,96,.28)!important;border-color:rgba(240,112,128,.75)!important;color:#ffd1d7!important;box-shadow:none!important}
 
 .app-access-hint:empty,.app-access-error:empty{display:none}.app-access-actions{margin-top:8px}
+
+.app-inline-btn{border-radius:12px!important}

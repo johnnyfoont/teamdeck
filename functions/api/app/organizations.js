@@ -14,11 +14,9 @@ export async function onRequestPost({ request, env }) {
   const data = await body(request);
   const name = clean(data.name || data.legalName);
   const inn = clean(data.inn);
-  const billingEmail = clean(data.billingEmail || auth.email).toLowerCase();
-  if (!name || !inn || !billingEmail) return json({ error: 'Название, ИНН и e-mail обязательны' }, 400);
+  const billingEmail = clean(data.billingEmail).toLowerCase() || null;
+  if (!name || !inn) return json({ error: 'Название и ИНН обязательны' }, 400);
   if (!/^\d{10}(\d{2})?$/.test(inn)) return json({ error: 'ИНН должен содержать 10 цифр для организации или 12 цифр для ИП' }, 400);
-  const verified = await env.TEAMDECK_KV.get(`billing_email_verified:${auth.userId}`, 'json');
-  if (!verified || verified.email !== billingEmail) return json({ error: 'Сначала подтвердите e-mail для выставления счёта', code: 'BILLING_EMAIL_UNVERIFIED' }, 400);
   const existing = await env.TEAMDECK_DB.prepare('SELECT id FROM organizations WHERE inn=?').bind(inn).first();
   if (existing) return json({ error: 'Организация с таким ИНН уже зарегистрирована', code: 'ORG_EXISTS' }, 409);
   const organizationId = id();
@@ -42,8 +40,6 @@ export async function onRequestPatch({ request, env }) {
   const membership = organization ? await env.TEAMDECK_DB.prepare('SELECT * FROM memberships WHERE organization_id=? AND user_id=? AND role IN (\'owner\',\'admin\')').bind(organization.id, auth.userId).first() : null;
   if (!organization || !membership) return json({ error: 'Организация не найдена' }, 404);
   const billingEmail = clean(data.billingEmail || organization.billing_email).toLowerCase();
-  const verified = await env.TEAMDECK_KV.get(`billing_email_verified:${auth.userId}`, 'json');
-  if (!verified || verified.email !== billingEmail) return json({ error: 'Сначала подтвердите e-mail для выставления счёта', code: 'BILLING_EMAIL_UNVERIFIED' }, 400);
   const plan = await env.TEAMDECK_DB.prepare('SELECT * FROM plans WHERE id=? OR code=?').bind(data.planId || '', data.planCode || '').first();
   if (!plan) return json({ error: 'Тариф не найден' }, 400);
   const isTrial = plan.code !== 'enterprise';
