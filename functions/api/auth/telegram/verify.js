@@ -28,8 +28,6 @@ export async function onRequestPost({ request, env }) {
     if (driftSeconds > 600) return json({ error: 'Telegram login data expired', detail: 'Истёк срок действия данных Telegram. Запустите вход ещё раз.' }, 401);
 
     stage = 'проверка подписи Telegram';
-    // Telegram Login Widget: data-check-string uses LF separators and the
-    // secret key is SHA-256(bot token), followed by HMAC-SHA-256.
     const checkString = Object.keys(payload)
       .filter(key => key !== 'hash' && payload[key] !== undefined && payload[key] !== null)
       .sort()
@@ -65,13 +63,17 @@ export async function onRequestPost({ request, env }) {
 
     stage = 'формирование ответа';
     const completeUrl = `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`;
-    return json(
-      { profile, redirectUrl: completeUrl },
-      200,
-      { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) }
-    );
+    return json({ profile, redirectUrl: completeUrl }, 200, {
+      'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request)
+    });
   } catch (error) {
     console.error('Telegram auth failed at stage:', stage, error);
-    return json({ error: 'Ошибка сервера авторизации', detail: `Сбой на этапе: ${stage}` }, 500);
+    const message = error instanceof Error ? error.message : String(error);
+    const name = error instanceof Error ? error.name : 'UnknownError';
+    return json({
+      error: 'Ошибка сервера авторизации',
+      detail: `Сбой на этапе: ${stage}`,
+      debug: `${name}: ${message}`
+    }, 500);
   }
 }
