@@ -30,5 +30,9 @@ export async function onRequestPost({ request, env }) {
   await recordSecurityEvent(env, request, { user: name, identity: profile.email, method: 'Telegram' });
   const session = randomToken();
   await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email: profile.email, name, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
-  return json({ profile }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
+  // Safari can be stricter about persisting cookies from an XHR/fetch response.
+  // Create a short-lived one-time handoff that is completed by a top-level navigation.
+  const handoff = randomToken();
+  await env.TEAMDECK_KV.put(`telegram:handoff:${handoff}`, JSON.stringify({ session }), { expirationTtl: 60 });
+  return json({ profile, redirectUrl: `/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}` }, 200, { 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) });
 }
