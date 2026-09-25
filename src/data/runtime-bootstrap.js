@@ -6,7 +6,7 @@ window.data.responses=Array.isArray(window.data.responses)?window.data.responses
 window.data.approvalArchive=Array.isArray(window.data.approvalArchive)?window.data.approvalArchive:[];
 if(typeof extraVacancies!=='undefined')extraVacancies.forEach(v=>{if(!window.data.vacancies.some(x=>x.id===v.id))window.data.vacancies.push(v)});
 if(typeof extraCandidates!=='undefined')extraCandidates.forEach(c=>{if(!window.data.candidates.some(x=>x.id===c.id))window.data.candidates.push(c)});
-function save(){localStorage.setItem('hireos-data',JSON.stringify(window.data))}
+function save(){localStorage.setItem('hireos-data',JSON.stringify(window.data));window.updateDashboardMetrics?.()}
 function saveResponses(){save()}
 function resetAnalyticsFilters(){document.getElementById('analyticsReset')?.classList.add('hidden')}
 window.TeamdeckRuntime={get data(){return window.data},save};

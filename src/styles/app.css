@@ -609,3 +609,8 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 @supports (padding: env(safe-area-inset-bottom)){
   @media (min-width:701px) and (max-width:1100px){.modalwrap{padding:22px max(22px,env(safe-area-inset-right)) max(22px,env(safe-area-inset-bottom)) max(22px,env(safe-area-inset-left))}.toast{right:max(22px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom))}.teamdeck-ai-launcher{right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom))}}
 }
+
+.dashboard-kpi-link{cursor:pointer;transition:transform .18s cubic-bezier(.23,1,.32,1),border-color .18s ease,box-shadow .18s ease}
+.dashboard-kpi-link:hover{transform:scale(1.025);border-color:rgba(6,88,246,.55);box-shadow:0 12px 28px rgba(0,0,0,.16)}
+.dashboard-kpi-link:focus-visible{outline:2px solid #0658F6;outline-offset:3px}
+.dashboard-kpi-link:active{transform:scale(.99)}
