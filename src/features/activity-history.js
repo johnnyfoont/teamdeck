@@ -20,6 +20,11 @@
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       if (!Array.isArray(parsed)) return [];
       const screening = parsed.filter((item) => item.title === 'Отклик перешёл на этап «Скрининг»');
+      const migrationKey = 'teamdeck-action-history-refusal-cleanup-v1';
+      if (!localStorage.getItem(migrationKey)) {
+        parsed.splice(0, parsed.length, ...parsed.filter((item) => item.title !== 'Отклик получил отказ'));
+        localStorage.setItem(migrationKey, '1');
+      }
       const liveData = currentData();
       const liveScreeningNames = new Set((Array.isArray(liveData.candidates) ? liveData.candidates : [])
         .filter((candidate) => candidate.stage === 'Скрининг')
