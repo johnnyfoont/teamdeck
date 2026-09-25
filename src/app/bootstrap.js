@@ -119,9 +119,13 @@
       localStorage.removeItem('teamdeck-auth-email');
       localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     }
-    if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') {
-      window.showLoginScreen();
-    }
+    const showLogin = () => {
+      if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') window.showLoginScreen();
+    };
+    // Telegram/Yandex sessions are restored asynchronously from KV on demo.
+    // Do not let the legacy bootstrap open login before that check completes.
+    if (location.hostname === 'demo.teamdeck.space') setTimeout(showLogin, 1200);
+    else showLogin();
   }
 
   function bindNavigation() {
