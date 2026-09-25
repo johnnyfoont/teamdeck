@@ -58,7 +58,6 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
-  function loginTargetCookie() { return document.cookie.split(';').map(item => item.trim()).find(item => item.startsWith('teamdeck_login_target='))?.split('=').slice(1).join('=') || ''; }
   function rememberLoginTarget() { localStorage.removeItem('teamdeck-login-target'); }
   function setCrossDomainSession(profile, method) {
     if (!isTeamdeckDomain || isDemoDomain) return;
