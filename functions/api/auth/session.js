@@ -8,8 +8,53 @@ function sessionToken(request) {
 
 export async function onRequestGet({ request, env }) {
   const token = sessionToken(request);
-  if (!token || !env.TEAMDECK_KV) return json({ authenticated: false }, 401);
+  const debug = new URL(request.url).searchParams.get('debug') === '1';
+
+  if (!token || !env.TEAMDECK_KV) {
+    if (debug) {
+      return json({
+        authenticated: false,
+        debug: {
+          host: new URL(request.url).hostname,
+          hasSessionCookie: Boolean(token),
+          hasTeamdeckKvBinding: Boolean(env.TEAMDECK_KV),
+          sessionFoundInKv: false
+        }
+      }, 401, { 'cache-control': 'no-store' });
+    }
+    return json({ authenticated: false }, 401);
+  }
+
   const session = await env.TEAMDECK_KV.get(`session:${token}`, 'json');
-  if (!session) return json({ authenticated: false }, 401);
-  return json({ authenticated: true, profile: { name: session.name || session.email || 'Пользователь', email: session.email || '' } });
+
+  if (!session) {
+    if (debug) {
+      return json({
+        authenticated: false,
+        debug: {
+          host: new URL(request.url).hostname,
+          hasSessionCookie: true,
+          hasTeamdeckKvBinding: true,
+          sessionFoundInKv: false
+        }
+      }, 401, { 'cache-control': 'no-store' });
+    }
+    return json({ authenticated: false }, 401);
+  }
+
+  return json({
+    authenticated: true,
+    profile: {
+      name: session.name || session.email || 'Пользователь',
+      email: session.email || ''
+    },
+    ...(debug ? {
+      debug: {
+        host: new URL(request.url).hostname,
+        hasSessionCookie: true,
+        hasTeamdeckKvBinding: true,
+        sessionFoundInKv: true
+      }
+    } : {})
+  }, 200, debug ? { 'cache-control': 'no-store' } : undefined);
 }
