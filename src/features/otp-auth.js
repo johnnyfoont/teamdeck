@@ -174,15 +174,13 @@
         // Use an actual anchor navigation instead of window.location/window.open:
         // Safari can throw a generic DOMException for invalid navigation strings.
         const handoffUrl = String(data.redirectUrl || '');
-        if (!/^https:\/\/demo\.teamdeck\.space\//i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
-        const link = document.createElement('a');
-        link.href = handoffUrl;
-        link.target = '_top';
-        link.rel = 'noopener';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        if (!/^https:\/\/demo\.teamdeck\.space\/api\/auth\/telegram\/complete\?handoff=/i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
+        const handoff = new URL(handoffUrl).searchParams.get('handoff') || '';
+        if (!handoff) throw new Error('Не удалось получить ключ перехода Telegram');
+        // Navigate to the demo first, then complete the handoff with a same-origin
+        // request. This makes the HttpOnly session cookie reliable in Safari.
+        const destination = 'https://demo.teamdeck.space/dashboard?telegram_handoff=' + encodeURIComponent(handoff);
+        window.location.href = destination;
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
