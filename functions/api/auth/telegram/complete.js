@@ -47,6 +47,7 @@ export async function onRequestGet({ request, env }) {
   }
   await env.TEAMDECK_KV.delete(key);
   const value = sessionCookie(record.session);
+  const successPage = '<!doctype html><meta charset="utf-8"><title>Teamdeck</title><p>Выполняется вход…</p><script>location.replace("/dashboard")</script>';
   if (wantsJson) return json({ authenticated: true, diagnostics: { handoffFoundInKv: true, sessionTokenPresent: true, sessionCookieSet: true, kvBindingPresent: true } }, 200, { 'set-cookie': value, 'cache-control': 'no-store' });
-  return new Response(null, { status: 302, headers: { location: 'https://demo.teamdeck.space/dashboard', 'cache-control': 'no-store', 'set-cookie': value } });
+  return new Response(successPage, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'set-cookie': value } });
 }
