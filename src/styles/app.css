@@ -614,3 +614,16 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .dashboard-kpi-link:hover{transform:scale(1.025);border-color:rgba(6,88,246,.55);box-shadow:0 12px 28px rgba(0,0,0,.16)}
 .dashboard-kpi-link:focus-visible{outline:2px solid #0658F6;outline-offset:3px}
 .dashboard-kpi-link:active{transform:scale(.99)}
+
+/* Action history */
+.action-history-card{cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+.action-history-card:hover{transform:translateY(-2px);background:rgba(32,46,68,.92);border-color:rgba(59,130,246,.55)}
+.action-history-list,.action-history-modal-list{display:flex;flex-direction:column;gap:12px;max-height:270px;overflow:hidden;padding:2px 4px 4px 2px}
+.action-history-event{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;position:relative;padding:5px 8px 5px 14px;border-left:3px solid #94a3b8;border-radius:0 10px 10px 0;transition:font-size .18s ease,background .18s ease,opacity .18s ease}
+.action-history-event:before{content:"";position:absolute;left:-5px;top:10px;width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(15,23,42,.9)}
+.action-history-event.is-latest{padding-top:8px;padding-bottom:8px;background:rgba(59,130,246,.09);font-size:1.04em;box-shadow:0 0 18px rgba(59,130,246,.1)}
+.action-history-event:not(.is-latest){opacity:.82}
+.action-history-time{font-size:.75rem;color:#94a3b8;padding-top:3px;white-space:nowrap}.action-history-copy{min-width:0;display:flex;flex-direction:column;gap:3px}.action-history-copy b{font-size:.87rem;color:#f8fafc;line-height:1.25}.action-history-copy small{font-size:.78rem;color:#aab7ca;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-type-vacancy{border-color:#3b82f6;color:#3b82f6}.event-type-candidate{border-color:#a78bfa;color:#a78bfa}.event-type-onboarding{border-color:#22c55e;color:#22c55e}.event-type-offboarding{border-color:#f97316;color:#f97316}.event-type-organization{border-color:#eab308;color:#eab308}
+.action-history-empty{padding:30px 10px;text-align:center;color:#94a3b8;font-size:.85rem}
+.action-history-toolbar{display:flex;gap:8px;margin:16px 0}.action-history-toolbar .btn{font-size:.82rem;padding:9px 13px}.action-history-modal-list{max-height:55vh;overflow:auto;padding-right:10px}.action-history-modal-list .action-history-event{padding-top:11px;padding-bottom:11px}.action-history-modal-list .action-history-copy b{font-size:.95rem}.action-history-modal-list .action-history-copy small{font-size:.85rem;white-space:normal}
