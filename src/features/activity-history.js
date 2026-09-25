@@ -151,7 +151,7 @@
     const host = document.getElementById('actionHistoryList');
     if (!host) return;
     const items = load().sort((a, b) => sort === 'newest' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
-    host.innerHTML = items.length ? items.slice(0, 12).map((item, index) => `<div class="action-history-event event-type-${esc(item.type)} ${index === 0 && sort === 'newest' ? 'is-latest' : ''}"><div class="action-history-time">${esc(item.time)}</div><div class="action-history-copy"><b>${esc(item.title)}</b><small>${esc(item.detail)}</small></div></div>`).join('') : '<div class="action-history-empty">Изменения в системе появятся здесь</div>';
+    host.innerHTML = items.length ? items.slice(0, 12).map((item, index) => { const titleLength = String(item.title || '').length; const titleSize = titleLength > 48 ? 'long' : titleLength > 30 ? 'medium' : 'normal'; return `<div class="action-history-event event-type-${esc(item.type)} ${index === 0 && sort === 'newest' ? 'is-latest' : ''}"><div class="action-history-time">${esc(item.time)}</div><div class="action-history-copy"><b class="action-history-title-${titleSize}">${esc(item.title)}</b><small>${esc(item.detail)}</small></div></div>`; }).join('') : '<div class="action-history-empty">Изменения в системе появятся здесь</div>';
     if (!scrollTimer) {
       scrollTimer = window.setInterval(() => { if (host.scrollHeight > host.clientHeight) host.scrollTo({ top: host.scrollTop >= host.scrollHeight - host.clientHeight - 4 ? 0 : host.scrollTop + 76, behavior: 'smooth' }); }, 3000);
     }
