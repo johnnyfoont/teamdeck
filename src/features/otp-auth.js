@@ -58,27 +58,6 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
-  function rememberLoginTarget() { localStorage.removeItem('teamdeck-login-target'); }
-  function setCrossDomainSession(profile, method) {
-    if (!isTeamdeckDomain || isDemoDomain) return;
-    // Authentication is shared by the HttpOnly teamdeck_session cookie.
-    // Remove the legacy client-readable cross-domain cookies so they cannot
-    // participate in routing or restore a stale local session.
-    document.cookie = 'teamdeck_cross_auth=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
-    document.cookie = 'teamdeck_cross_method=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
-    document.cookie = 'teamdeck_cross_profile=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
-    const params = new URLSearchParams(location.search);
-    const rawReturn = params.get('return') || '/dashboard';
-    const returnPath = rawReturn.startsWith('/') && !rawReturn.startsWith('//') ? rawReturn : '/dashboard';
-    const destination = 'https://demo.teamdeck.space';
-    document.cookie = 'teamdeck_login_target=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
-    localStorage.removeItem('teamdeck-login-target');
-    localStorage.removeItem('teamdeck-auth');
-    localStorage.removeItem('teamdeck-auth-method');
-    localStorage.removeItem('teamdeck-auth-profile');
-    localStorage.removeItem('teamdeck-auth-email');
-    window.location.replace(destination + returnPath);
-  }
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
     const cookies = Object.fromEntries(document.cookie.split(';').map(item => item.trim().split('=').map(decodeURIComponent)).filter(pair => pair[0]));
@@ -90,37 +69,6 @@
       try { localStorage.setItem('teamdeck-auth-profile', cookies.teamdeck_cross_profile); } catch (_) {}
     }
     localStorage.setItem('teamdeck-active-view', 'dashboard');
-  }
-  async function completeTelegramHandoff() {
-    if (!isDemoDomain) return;
-    const params = new URLSearchParams(location.search);
-    const handoff = params.get('telegram_handoff');
-    if (!handoff) return;
-    let lastError = null;
-    window.teamdeckTelegramDiagnostic = '';
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      try {
-        const response = await fetch('/api/auth/telegram/complete?handoff=' + encodeURIComponent(handoff), {
-          headers: { accept: 'application/json' }, credentials: 'include', cache: 'no-store'
-        });
-        const body = await response.text();
-        let data = {};
-        try { data = body ? JSON.parse(body) : {}; } catch (_) {}
-        if (response.ok && data.authenticated) {
-          window.teamdeckTelegramDiagnostic = 'Handoff: найден в KV ✓ · cookie: установлена ✓';
-          history.replaceState({}, '', '/dashboard');
-          return true;
-        }
-        lastError = new Error(data.detail || data.error || ('HTTP ' + response.status));
-        window.teamdeckTelegramDiagnostic = 'Handoff: НЕ найден / ошибка · ' + lastError.message;
-      } catch (error) {
-        lastError = error;
-        window.teamdeckTelegramDiagnostic = 'Handoff: ошибка запроса · ' + (error.message || error);
-      }
-      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 300));
-    }
-    console.error('Telegram handoff failed:', lastError);
-    return false;
   }
 
   async function hydrateServerSession() {
@@ -215,28 +163,6 @@
       // This avoids Safari losing the optional one-time redirectUrl handoff.
       if (location.hostname === 'login.teamdeck.space') {
         window.location.replace('https://demo.teamdeck.space/dashboard');
-        return;
-      }
-      if (data.redirectUrl) {
-        authStage = 'переход в демо';
-        // Use an actual anchor navigation instead of window.location/window.open:
-        // Safari can throw a generic DOMException for invalid navigation strings.
-        const handoffUrl = String(data.redirectUrl || '');
-        if (!/^https:\/\/demo\.teamdeck\.space\/\?telegram_handoff=/i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
-        let handoff = '';
-        try {
-          const parsed = new URL(handoffUrl);
-          handoff = parsed.searchParams.get('telegram_handoff') || parsed.searchParams.get('handoff') || '';
-        } catch (_) {}
-        if (!handoff) {
-          const match = handoffUrl.match(/[?&](?:telegram_handoff|handoff)=([^&]+)/i);
-          handoff = match ? decodeURIComponent(match[1]) : '';
-        }
-        if (!handoff) throw new Error('Не удалось получить ключ перехода Telegram');
-        // Navigate to the demo first, then complete the handoff with a same-origin
-        // request. This makes the HttpOnly session cookie reliable in Safari.
-        const destination = 'https://demo.teamdeck.space/dashboard?telegram_handoff=' + encodeURIComponent(handoff);
-        window.location.href = destination;
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
@@ -395,8 +321,6 @@
 
   window.initOtpAuth = renderOtpForm;
   async function initOtpAuth() {
-    rememberLoginTarget();
-    await completeTelegramHandoff();
     await hydrateServerSession();
     // Server session is the single source of truth for cross-domain authentication.
     // The legacy teamdeck_cross_* cookies are intentionally ignored.
