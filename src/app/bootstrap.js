@@ -120,6 +120,10 @@
       localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
     }
     const showLogin = () => {
+      // Telegram handoff is still being processed by otp-auth.js. Do not
+      // replace the login form while that flow is producing its diagnostic.
+      const telegramHandoff = new URLSearchParams(window.location.search).get('telegram_handoff');
+      if (telegramHandoff) return;
       if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') window.showLoginScreen();
     };
     // On demo, auth is restored asynchronously (cross-domain cookie / KV).
