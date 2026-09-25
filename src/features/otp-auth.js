@@ -158,11 +158,11 @@
       }
       authStage = 'проверка ответа сервера';
       if (!response.ok || !data.profile) throw new Error(data.detail || data.error || 'Не удалось проверить вход через Telegram');
-      // The login host must never render the application. The verify endpoint
-      // already sets the shared HttpOnly session cookie; navigate directly to demo.
-      // This avoids Safari losing the optional one-time redirectUrl handoff.
+      // Use a one-time server handoff so Safari never has to carry an HttpOnly
+      // cookie from login.teamdeck.space to demo.teamdeck.space.
       if (location.hostname === 'login.teamdeck.space') {
-        window.location.replace('https://demo.teamdeck.space/dashboard');
+        if (!data.handoff) throw new Error('Сервер не вернул одноразовый ключ перехода в demo');
+        window.location.replace('https://demo.teamdeck.space/api/auth/telegram/complete?handoff=' + encodeURIComponent(data.handoff));
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
