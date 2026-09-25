@@ -26,5 +26,9 @@ export async function onRequestGet({ request, env }) {
   await recordSecurityEvent(env, request, { user: name, identity: profile.email, method: 'Telegram' });
   const session = randomToken();
   await env.TEAMDECK_KV.put(`session:${session}`, JSON.stringify({ email: profile.email, name, createdAt: Date.now() }), { expirationTtl: 60 * 60 * 24 * 30 });
-  return new Response(null, { status: 302, headers: { location: 'https://demo.teamdeck.space/dashboard', 'cache-control': 'no-store', 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) } });
+  // Do not rely on Safari accepting a Domain=.teamdeck.space cookie from the
+  // Telegram popup. Let demo set its own host-only cookie after consuming handoff.
+  const handoff = randomToken();
+  await env.TEAMDECK_KV.put(`telegram:handoff:${handoff}`, JSON.stringify({ session }), { expirationTtl: 60 });
+  return new Response(null, { status: 302, headers: { location: `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`, 'cache-control': 'no-store' } });
 }
