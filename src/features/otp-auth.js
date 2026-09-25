@@ -309,6 +309,9 @@
     rememberLoginTarget();
     await hydrateServerSession();
     hydrateCrossDomainSession();
+    // Signal bootstrap.js only after all server/cross-domain auth hydration is complete.
+    window.teamdeckAuthHydrated = true;
+    window.dispatchEvent(new Event('teamdeck:auth-hydrated'));
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
