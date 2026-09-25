@@ -162,7 +162,7 @@
       if (data.redirectUrl) {
         // Complete the session handoff as a top-level navigation so Safari
         // reliably stores the shared HttpOnly cookie before opening the demo.
-        window.top.location.href = data.redirectUrl;
+        const handoffUrl = String(data.redirectUrl || ''); if (!/^https:\/\/demo\.teamdeck\.space\//i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации'); window.open(handoffUrl, '_top');
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
