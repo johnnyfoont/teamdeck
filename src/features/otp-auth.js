@@ -233,6 +233,12 @@
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+      // Login is an authentication boundary, never the application shell.
+      // Even if the provider response has no redirectUrl, leave login explicitly.
+      if (location.hostname === 'login.teamdeck.space') {
+        window.location.replace('https://demo.teamdeck.space/dashboard');
+        return;
+      }
       syncProfile(data.profile, 'external'); syncSecurityMenu(); startSessionMonitor(); setCrossDomainSession(data.profile, 'telegram'); showApp(); if (typeof goHome === 'function') goHome(); window.dispatchEvent(new Event('teamdeck:authenticated'));
     } catch (error) { if (/заблокирован/i.test(error.message)) showBlockedScreen(user?.username ? `${user.username}@telegram.local` : 'Telegram аккаунт'); else if (/Telegram login data expired/i.test(error.message)) { document.getElementById('telegram-login-widget')?.remove(); setError('Срок действия данных Telegram истёк. Нажмите кнопку Telegram ещё раз.'); } else setError(error.message); }
   };
