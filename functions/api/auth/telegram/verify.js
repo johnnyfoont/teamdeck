@@ -6,7 +6,7 @@ function hex(bytes) { return [...new Uint8Array(bytes)].map(b => b.toString(16).
 
 async function hmac(key, value) {
   const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return crypto.subtle.sign(cryptoKey, encoder.encode(value));
+  return crypto.subtle.sign({ name: 'HMAC' }, cryptoKey, encoder.encode(value));
 }
 
 async function sha256(value) { return crypto.subtle.digest('SHA-256', encoder.encode(value)); }
