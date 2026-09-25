@@ -210,6 +210,13 @@
       }
       authStage = 'проверка ответа сервера';
       if (!response.ok || !data.profile) throw new Error(data.detail || data.error || 'Не удалось проверить вход через Telegram');
+      // The login host must never render the application. The verify endpoint
+      // already sets the shared HttpOnly session cookie; navigate directly to demo.
+      // This avoids Safari losing the optional one-time redirectUrl handoff.
+      if (location.hostname === 'login.teamdeck.space') {
+        window.location.replace('https://demo.teamdeck.space/dashboard');
+        return;
+      }
       if (data.redirectUrl) {
         authStage = 'переход в демо';
         // Use an actual anchor navigation instead of window.location/window.open:
