@@ -6,6 +6,7 @@
   let previous = null;
   let sort = 'newest';
   let scrollTimer = null;
+  const pendingMoves = [];
 
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
   const nowLabel = () => new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -64,6 +65,12 @@
     };
   }
 
+  function markMovedResponse(name, vacancy) {
+    const detail = `${name}${vacancy ? ` · ${vacancy}` : ''}`;
+    pendingMoves.push({ name: String(name || ''), detail, timestamp: Date.now() });
+    addEvent('candidate', 'Отклик перешёл на этап «Скрининг»', detail);
+  }
+
   function addEvent(type, title, detail) {
     const items = load();
     items.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, type, title, detail, time: nowLabel(), timestamp: Date.now() });
@@ -94,9 +101,9 @@
     diffMap(before.candidates, after.candidates,
       (item) => {
         const moved = removedResponses.find((response) => response.name === item.name && item.stage === 'Скрининг');
-        if (moved) {
-          movedResponseNames.add(moved.name);
-          addEvent('candidate', 'Отклик перешёл на этап «Скрининг»', `${item.name}${moved.vacancy ? ` · ${moved.vacancy}` : ''}`);
+        const explicitlyMoved = pendingMoves.find((move) => move.name === item.name);
+        if (moved || explicitlyMoved) {
+          movedResponseNames.add(item.name);
         } else addEvent('candidate', 'Добавлен новый кандидат', item.name);
       },
       (item) => addEvent('candidate', 'Кандидат удалён', item.name),
@@ -106,6 +113,7 @@
         addEvent('candidate', finalStage ? 'Кандидат принял оффер и перешёл в онбординг' : 'Кандидат перешёл на новый этап', `${item.name} · ${item.stage}`);
       });
 
+    pendingMoves.splice(0, pendingMoves.length);
     removedResponses.filter((item) => !movedResponseNames.has(item.name)).forEach((item) => {
       addEvent('candidate', 'Отклик получил отказ', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`);
     });
@@ -157,6 +165,7 @@
   }
 
   window.teamdeckHistorySort = (value) => { sort = value; openHistory(); };
+  window.teamdeckHistoryMarkMovedResponse = markMovedResponse;
   window.openActionHistory = openHistory;
   window.renderActionHistory = render;
 
