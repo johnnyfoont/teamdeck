@@ -12,6 +12,37 @@
     { id: 'kpiOffboarding', valueId: 'kOffboarding', label: 'Оффбординг', view: 'offboarding', get: () => Array.isArray(window.offboardingPeople) ? window.offboardingPeople.length : 0 },
   ];
 
+  function funnelCounts() {
+    const current = demoData();
+    const candidates = Array.isArray(current?.candidates) ? current.candidates : [];
+    const responses = Array.isArray(current?.responses) ? current.responses.length : 0;
+    return {
+      responses,
+      screening: candidates.filter((candidate) => candidate.stage === 'Скрининг').length,
+      interview: candidates.filter((candidate) => String(candidate.stage || '').startsWith('Интервью')).length,
+      offer: candidates.filter((candidate) => candidate.stage === 'Оффер').length,
+      hired: candidates.filter((candidate) => candidate.stage === 'Нанято').length,
+    };
+  }
+
+  function updateFunnel() {
+    const counts = funnelCounts();
+    const values = [
+      ['dashboardFunnelResponses', counts.responses],
+      ['dashboardFunnelScreening', counts.screening],
+      ['dashboardFunnelInterview', counts.interview],
+      ['dashboardFunnelOffer', counts.offer],
+      ['dashboardFunnelHired', counts.hired],
+    ];
+    const max = Math.max(...values.map(([, value]) => value), 0);
+    values.forEach(([id, value]) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = String(value);
+      const bar = document.querySelector(`[data-funnel-bar="${id}"]`);
+      if (bar) bar.style.width = `${max ? (value / max) * 100 : 0}%`;
+    });
+  }
+
   function navigate(view) {
     const button = document.querySelector(`#nav button[data-view="${view}"]`);
     if (button) button.click();
@@ -41,6 +72,7 @@
       if (value) value.textContent = String(item.get());
       decorateCard(card, item);
     });
+    updateFunnel();
   }
 
   window.updateDashboardMetrics = updateDashboardMetrics;
