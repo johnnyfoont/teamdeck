@@ -23,7 +23,7 @@ export async function onRequestGet({ request, env }) {
   const wantsJson = (request.headers.get('accept') || '').includes('application/json');
   if (!env.TEAMDECK_KV) {
     if (wantsJson) return json({ authenticated: false, error: 'telegram_kv_missing', detail: 'На demo.teamdeck.space не найден KV binding TEAMDECK_KV.' }, 503);
-    return redirect('https://login.teamdeck.space/?telegram=server');
+    return redirect('https://demo.teamdeck.space/?auth_debug=1&stage=complete&reason=server');
   }
   if (!handoff) {
     const existing = await sessionProfile(request, env);
@@ -32,7 +32,7 @@ export async function onRequestGet({ request, env }) {
       return new Response(null, { status: 302, headers: { location: 'https://demo.teamdeck.space/dashboard', 'cache-control': 'no-store', 'set-cookie': sessionCookie(existing.token) } });
     }
     if (wantsJson) return json({ authenticated: false, error: 'telegram_handoff_missing', detail: 'Telegram handoff отсутствует, server-session также не найдена.' }, 400);
-    return redirect('https://login.teamdeck.space/');
+    return redirect('https://demo.teamdeck.space/?auth_debug=1&stage=complete&reason=missing');
   }
   const key = `telegram:handoff:${handoff}`;
   const record = await env.TEAMDECK_KV.get(key, 'json');
@@ -43,7 +43,7 @@ export async function onRequestGet({ request, env }) {
       return new Response(null, { status: 302, headers: { location: 'https://demo.teamdeck.space/dashboard', 'cache-control': 'no-store', 'set-cookie': sessionCookie(existing.token) } });
     }
     if (wantsJson) return json({ authenticated: false, error: 'telegram_handoff_not_found', detail: 'Telegram handoff не найден и server-session недоступна.' }, 404);
-    return redirect('https://login.teamdeck.space/?telegram=expired');
+    return redirect('https://demo.teamdeck.space/?auth_debug=1&stage=complete&reason=expired');
   }
   await env.TEAMDECK_KV.delete(key);
   const value = sessionCookie(record.session);
