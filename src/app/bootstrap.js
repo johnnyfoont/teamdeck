@@ -122,10 +122,18 @@
     const showLogin = () => {
       if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && typeof window.showLoginScreen === 'function') window.showLoginScreen();
     };
-    // Telegram/Yandex sessions are restored asynchronously from KV on demo.
-    // Do not let the legacy bootstrap open login before that check completes.
-    if (location.hostname === 'demo.teamdeck.space') setTimeout(showLogin, 1200);
-    else showLogin();
+    // On demo, auth is restored asynchronously (cross-domain cookie / KV).
+    // Wait for otp-auth.js to finish that hydration before deciding to show login.
+    // The global flag prevents a race if this listener is registered after otp-auth.js.
+    if (location.hostname === 'demo.teamdeck.space') {
+      if (window.teamdeckAuthHydrated === true) {
+        showLogin();
+      } else {
+        window.addEventListener('teamdeck:auth-hydrated', showLogin, { once: true });
+      }
+    } else {
+      showLogin();
+    }
   }
 
   function bindNavigation() {
