@@ -216,7 +216,7 @@
         // Safari can throw a generic DOMException for invalid navigation strings.
         const handoffUrl = String(data.redirectUrl || '');
         if (!/^https:\/\/demo\.teamdeck\.space\/\?telegram_handoff=/i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
-        const handoff = new URL(handoffUrl).searchParams.get('handoff') || '';
+        const handoff = new URL(handoffUrl).searchParams.get('telegram_handoff') || '';
         if (!handoff) throw new Error('Не удалось получить ключ перехода Telegram');
         // Navigate to the demo first, then complete the handoff with a same-origin
         // request. This makes the HttpOnly session cookie reliable in Safari.
