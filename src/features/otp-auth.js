@@ -72,7 +72,9 @@
   }
 
   async function hydrateServerSession() {
-    if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
+    // Always ask the demo server first. A stale demo/localStorage flag must not
+    // override a valid Telegram session created by the handoff endpoint.
+    if (!isDemoDomain) return;
     window.teamdeckServerDiagnostic = '';
     for (let attempt = 0; attempt < 4; attempt += 1) {
       try {
