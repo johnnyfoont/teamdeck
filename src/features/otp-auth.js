@@ -96,33 +96,53 @@
     const params = new URLSearchParams(location.search);
     const handoff = params.get('telegram_handoff');
     if (!handoff) return;
-    try {
-      const response = await fetch('/api/auth/telegram/complete?handoff=' + encodeURIComponent(handoff), {
-        headers: { accept: 'application/json' },
-        credentials: 'include',
-        cache: 'no-store'
-      });
-      if (!response.ok) throw new Error('Не удалось завершить вход через Telegram');
-      history.replaceState({}, '', '/dashboard');
-    } catch (error) {
-      console.error('Telegram handoff failed:', error);
-      setError(error.message);
+    let lastError = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        const response = await fetch('/api/auth/telegram/complete?handoff=' + encodeURIComponent(handoff), {
+          headers: { accept: 'application/json' },
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        if (response.ok) {
+          history.replaceState({}, '', '/dashboard');
+          return;
+        }
+        const body = await response.text();
+        let detail = '';
+        try {
+          const data = body ? JSON.parse(body) : {};
+          detail = data.detail || data.error || '';
+        } catch (_) {}
+        lastError = new Error(detail || ('Не удалось завершить вход через Telegram (HTTP ' + response.status + ')'));
+      } catch (error) {
+        lastError = error;
+      }
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 300));
     }
+    console.error('Telegram handoff failed:', lastError);
+    setError(lastError?.message || 'Не удалось завершить вход через Telegram');
   }
 
   async function hydrateServerSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
-    try {
-      const response = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
-      if (!response.ok) return;
-      const data = await response.json();
-      if (!data.authenticated || !data.profile) return;
-      localStorage.setItem('teamdeck-auth', 'logged-in');
-      localStorage.setItem('teamdeck-auth-method', 'external');
-      localStorage.setItem('teamdeck-auth-email', data.profile.email || '');
-      localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-      localStorage.setItem('teamdeck-active-view', 'dashboard');
-    } catch (_) {}
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        const response = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.profile) {
+            localStorage.setItem('teamdeck-auth', 'logged-in');
+            localStorage.setItem('teamdeck-auth-method', 'external');
+            localStorage.setItem('teamdeck-auth-email', data.profile.email || '');
+            localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+            localStorage.setItem('teamdeck-active-view', 'dashboard');
+            return;
+          }
+        }
+      } catch (_) {}
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 300));
+    }
   }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
