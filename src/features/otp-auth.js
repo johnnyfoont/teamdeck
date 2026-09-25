@@ -155,14 +155,34 @@
   };
 
   window.onTelegramAuth = async function (user) {
+    let authStage = 'подготовка авторизации';
     try {
+      authStage = 'отправка данных Telegram';
       const response = await fetch('/api/auth/telegram/verify', { method: 'POST', headers: { 'content-type': 'application/json', 'x-teamdeck-device': clientDeviceCategory() }, body: JSON.stringify(user) });
-      const data = await response.json();
+      authStage = 'получение ответа сервера';
+      const raw = await response.text();
+      let data;
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch (_) {
+        throw new Error('Сервер авторизации вернул некорректный ответ (HTTP ' + response.status + ')');
+      }
+      authStage = 'проверка ответа сервера';
       if (!response.ok || !data.profile) throw new Error(data.detail || data.error || 'Не удалось проверить вход через Telegram');
       if (data.redirectUrl) {
-        // Complete the session handoff as a top-level navigation so Safari
-        // reliably stores the shared HttpOnly cookie before opening the demo.
-        const handoffUrl = String(data.redirectUrl || ''); if (!/^https:\/\/demo\.teamdeck\.space\//i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации'); window.open(handoffUrl, '_top');
+        authStage = 'переход в демо';
+        // Use an actual anchor navigation instead of window.location/window.open:
+        // Safari can throw a generic DOMException for invalid navigation strings.
+        const handoffUrl = String(data.redirectUrl || '');
+        if (!/^https:\/\/demo\.teamdeck\.space\//i.test(handoffUrl)) throw new Error('Некорректный адрес перехода после авторизации');
+        const link = document.createElement('a');
+        link.href = handoffUrl;
+        link.target = '_top';
+        link.rel = 'noopener';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
         return;
       }
       localStorage.setItem('teamdeck-auth', 'logged-in'); localStorage.setItem('teamdeck-auth-method', 'telegram'); localStorage.setItem('teamdeck-auth-email', data.profile.email); localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
