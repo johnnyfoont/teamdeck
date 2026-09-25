@@ -23,7 +23,7 @@ export async function onRequestPost({ request, env }) {
   const slug = `org-${organizationId.slice(0, 8)}`;
   try {
     await env.TEAMDECK_DB.batch([
-      env.TEAMDECK_DB.prepare('INSERT INTO organizations (id,name,slug,legal_name,inn,kpp,legal_address,billing_email,status,company_source) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(organizationId, name, slug, clean(data.legalName) || name, inn, clean(data.kpp) || null, clean(data.legalAddress) || null, billingEmail, 'draft', clean(data.companySource) || 'manual'),
+      env.TEAMDECK_DB.prepare('INSERT INTO organizations (id,name,slug,legal_name,inn,ogrn,legal_address,billing_email,status,company_source) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(organizationId, name, slug, clean(data.legalName) || name, inn, clean(data.ogrn) || null, clean(data.legalAddress) || null, billingEmail, 'draft', clean(data.companySource) || 'manual'),
       env.TEAMDECK_DB.prepare(`INSERT INTO memberships (id,organization_id,user_id,role,status) VALUES (?,?,?,?, 'active')`).bind(id(), organizationId, auth.userId, 'owner')
     ]);
   } catch (error) {
