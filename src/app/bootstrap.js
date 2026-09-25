@@ -110,6 +110,7 @@
   }
 
   function enforceAuthentication() {
+    if (location.hostname === 'app.teamdeck.space' || /(^|\.)teamdeck-app-preview\.pages\.dev$/i.test(location.hostname)) return;
     const authMethod = localStorage.getItem('teamdeck-auth-method');
     const isLegacyDemoSession = localStorage.getItem('teamdeck-auth') === 'logged-in' && !authMethod;
     if ((authMethod === 'demo' || isLegacyDemoSession) && localStorage.getItem('teamdeck-demo-session-version') !== DEMO_SESSION_VERSION) {

@@ -309,6 +309,7 @@
         }
       }
       document.documentElement.classList.remove('auth-bootstrap-pending');
+      showApp();
       return;
     }
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
