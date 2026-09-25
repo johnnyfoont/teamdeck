@@ -291,21 +291,25 @@
   window.initOtpAuth = renderOtpForm;
   async function initOtpAuth() {
     hydrateCrossDomainSession();
-    if (isAppDomain && localStorage.getItem('teamdeck-auth') !== 'logged-in') {
+    if (isAppDomain) {
       const returnPath = `${location.pathname}${location.search}${location.hash}`;
       document.cookie = 'teamdeck_login_target=app; Domain=.teamdeck.space; Path=/; Max-Age=900; Secure; SameSite=Lax';
-      try {
-        const response = await fetch('/api/app/bootstrap', { credentials: 'include', cache: 'no-store' });
-        if (response.status === 401) {
+      if (localStorage.getItem('teamdeck-auth') !== 'logged-in') {
+        try {
+          const response = await fetch('/api/app/bootstrap', { credentials: 'include', cache: 'no-store' });
+          if (response.status === 401) {
+            location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
+            return;
+          }
+          localStorage.setItem('teamdeck-auth', 'logged-in');
+          localStorage.setItem('teamdeck-auth-method', 'external');
+        } catch (_) {
           location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
           return;
         }
-        localStorage.setItem('teamdeck-auth', 'logged-in');
-        localStorage.setItem('teamdeck-auth-method', 'external');
-      } catch (_) {
-        location.replace('https://login.teamdeck.space/?return=' + encodeURIComponent(returnPath || '/dashboard') + '&app=1');
-        return;
       }
+      document.documentElement.classList.remove('auth-bootstrap-pending');
+      return;
     }
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
