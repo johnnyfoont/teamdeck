@@ -662,8 +662,8 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .action-history-event.is-latest.event-type-rejection{background:rgba(239,68,68,.12)!important}
 
 /* Dashboard history cards keep a stable two-row layout; long titles scale down. */
-.action-history-list{height:154px!important;min-height:154px!important;max-height:154px!important}
-.action-history-list .action-history-event,.action-history-list .action-history-event.is-latest{height:72px!important;min-height:72px!important;max-height:72px!important;box-sizing:border-box!important}
+.action-history-list{height:182px!important;min-height:182px!important;max-height:182px!important}
+.action-history-list .action-history-event,.action-history-list .action-history-event.is-latest{height:86px!important;min-height:86px!important;max-height:86px!important;box-sizing:border-box!important}
 .action-history-list .action-history-copy b{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important}
 .action-history-list .action-history-copy small{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
 .action-history-list .action-history-title-normal{font-size:.92rem!important}
