@@ -30,5 +30,5 @@ export async function onRequestGet({ request, env }) {
   // Telegram popup. Let demo set its own host-only cookie after consuming handoff.
   const handoff = randomToken();
   await env.TEAMDECK_KV.put(`telegram:handoff:${handoff}`, JSON.stringify({ session }), { expirationTtl: 60 });
-  return new Response(null, { status: 302, headers: { location: `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`, 'cache-control': 'no-store' } });
+  return new Response(null, { status: 302, headers: { location: `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`, 'cache-control': 'no-store', 'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request) } });
 }

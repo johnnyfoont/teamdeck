@@ -5,6 +5,7 @@
   let codeRequested = false;
   let sessionMonitor;
   let blockedMonitor;
+  let telegramPoll;
   const DEMO_SESSION_VERSION = '2026-09-20-reset-3';
 
   function form() { return document.querySelector('.auth-form'); }
@@ -138,7 +139,19 @@
       host.insertAdjacentElement('afterend', wrapper);
       const script = document.createElement('script'); script.async = true; script.src = 'https://telegram.org/js/telegram-widget.js?22';
       script.dataset.telegramLogin = 'teamdeck_login_bot'; script.dataset.size = 'medium'; script.dataset.userpic = 'false'; script.dataset.requestAccess = 'write'; script.dataset.authUrl = 'https://login.teamdeck.space/api/auth/telegram/callback';
-      wrapper.appendChild(script); setStatus('Откройте Telegram и подтвердите вход.'); return;
+      wrapper.appendChild(script); setStatus('Откройте Telegram и подтвердите вход.');
+      clearInterval(telegramPoll);
+      telegramPoll = setInterval(async () => {
+        try {
+          const response = await fetch('/api/auth/session?debug=1', { credentials: 'include', cache: 'no-store' });
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && data.authenticated) {
+            clearInterval(telegramPoll);
+            window.location.replace('https://demo.teamdeck.space/dashboard');
+          }
+        } catch (_) {}
+      }, 1000);
+      return;
     }
     setError('Авторизация через ' + (labels[provider] || provider) + ' будет подключена после настройки приложения провайдера.');
   };
