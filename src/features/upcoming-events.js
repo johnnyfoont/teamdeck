@@ -1,0 +1,57 @@
+/* Teamdeck calendar CRUD + dashboard upcoming events. Classic script intentionally shares demo globals. */
+(function () {
+  'use strict';
+  const hiringKey = 'teamdeck-hiring-meetings-v2';
+  const offKey = 'teamdeck-offboarding-calendar-events-v1';
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const today = () => new Date().toLocaleDateString('en-CA');
+  const colorFor = (m) => m.color || ({'Скрининг':'#8b7cf6','Интервью':'#3b82f6','Финальное интервью':'#f59e0b','Оффер':'#22c55e'}[m.stage] || '#8b7cf6');
+  function read(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return Array.isArray(v) ? v : fallback; } catch (_) { return fallback; } }
+  function saveMeetings() { localStorage.setItem(hiringKey, JSON.stringify(hiringMeetings)); }
+  function offEvents() { return read(offKey, []); }
+  function saveOffEvents(v) { localStorage.setItem(offKey, JSON.stringify(v)); }
+  function dateLabel(v) { return new Date(`${v}T12:00:00`).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}); }
+  function monthGrid(target, type) {
+    const grid = document.getElementById(type === 'hiring' ? 'hiringCalendar' : 'offboardingCalendar');
+    const title = document.getElementById(type === 'hiring' ? 'calendarTitle' : 'offboardingCalendarTitle');
+    if (!grid) return;
+    const month = target || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const y = month.getFullYear(), m = month.getMonth(), first = (new Date(y,m,1).getDay()+6)%7, days = new Date(y,m+1,0).getDate(), prev = new Date(y,m,0).getDate();
+    if (title) title.textContent = new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(month);
+    const names = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+    let html = names.map(n=>`<div class="calendar-weekday">${n}</div>`).join('');
+    for(let i=0;i<first;i++) html += `<div class="calendar-day muted"><div class="day-number">${prev-first+i+1}</div></div>`;
+    const extra = type === 'hiring' ? hiringMeetings.map(x=>({...x, _kind:'hiring'})) : offEvents().map(x=>({...x, _kind:'off'}));
+    if(type === 'off') (typeof offboardingPeople !== 'undefined' ? offboardingPeople : []).forEach(p=>extra.push({id:p.id,date:p.lastDay,time:'',title:p.name,subtitle:typeof offboardingStages!=='undefined'?offboardingStages[Math.max(0,Number(p.stage)||0)]:'Оффбординг',_kind:'person'}));
+    for(let d=1;d<=days;d++) {
+      const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`, items=extra.filter(x=>x.date===iso), isToday=iso===today();
+      html += `<div class="calendar-day ${isToday?'today':''}" onclick="${type==='hiring'?`openHiringDay('${iso}')`:`openOffboardingCalendarDay('${iso}')`}"><div class="day-number">${d}</div>${items.map(x=>`<button type="button" class="calendar-event ${x._kind==='person'?'offboarding-calendar-event':''}" style="--event-color:${esc(colorFor(x))}" onclick="event.stopPropagation();${x._kind==='hiring'?`openMeeting(${x.id})`:x._kind==='off'?`openOffboardingCalendarEvent(${x.id})`:`openOffboardingPerson(${x.id})`}"><span>${esc(x.time ? `${x.time} · ` : '')}${esc(x.title||x.stage||x.name)}</span>${x.subtitle?`<small>${esc(x.subtitle)}</small>`:''}</button>`).join('')}</div>`;
+    }
+    const total=first+days; for(let i=1;i<=42-total;i++) html += `<div class="calendar-day muted"><div class="day-number">${i}</div></div>`;
+    grid.innerHTML=html;
+  }
+  function form(title, event, action, canDelete, deleteAction) {
+    const e=event||{date:today(),time:'10:00',title:'',color:'#8b7cf6',details:''};
+    document.getElementById('modalContent').innerHTML=`<div class="modalhead"><div><h2>${title}</h2><p class="mini">Событие будет отображаться в календаре и на дашборде</p></div><button class="close" onclick="closeModal()">×</button></div><div class="formgrid"><div class="field full"><label>Название события</label><input class="input" id="calendarEventTitle" value="${esc(e.title||e.stage||'')}"></div><div class="field"><label>Дата</label><input class="input" id="calendarEventDate" type="date" value="${esc(e.date)}"></div><div class="field"><label>Время</label><input class="input" id="calendarEventTime" type="time" value="${esc(e.time||'10:00')}"></div><div class="field"><label>Цвет</label><input class="input calendar-color-input" id="calendarEventColor" type="color" value="${esc(colorFor(e))}"></div><div class="field full"><label>Детали</label><textarea class="input" id="calendarEventDetails" rows="3">${esc(e.details||'')}</textarea></div></div><div class="modalfoot">${canDelete?`<button class="btn danger" onclick="${deleteAction||`deleteHiringEvent(${e.id})`}">Удалить</button>`:''}<button class="btn cancel-button" onclick="closeModal()">Отмена</button><button class="btn primary" onclick="${action}">Сохранить событие</button></div>`;
+    openModal();
+  }
+  window.openHiringDay = (date) => form('Новое событие найма',{date,time:'10:00',title:'',color:'#8b7cf6'},'createHiringEvent()',false);
+  window.createHiringEvent = () => { const title=document.getElementById('calendarEventTitle').value.trim(), date=document.getElementById('calendarEventDate').value; if(!title||!date){toast('Укажите название и дату');return;} hiringMeetings.push({id:Date.now(),date,time:document.getElementById('calendarEventTime').value||'10:00',stage:title,title,candidate:'',interviewer:'',mode:'',details:document.getElementById('calendarEventDetails').value.trim(),color:document.getElementById('calendarEventColor').value}); saveMeetings(); closeModal(); renderHiringCalendar(); renderUpcomingEvents(); toast('Событие добавлено'); };
+  window.openMeeting = (id) => { const m=hiringMeetings.find(x=>Number(x.id)===Number(id)); if(!m)return; form('Редактировать событие',m,`updateHiringEvent(${m.id})`,true); };
+  window.updateHiringEvent = (id) => { const m=hiringMeetings.find(x=>Number(x.id)===Number(id)); if(!m)return; Object.assign(m,{title:document.getElementById('calendarEventTitle').value.trim(),stage:document.getElementById('calendarEventTitle').value.trim(),date:document.getElementById('calendarEventDate').value,time:document.getElementById('calendarEventTime').value,color:document.getElementById('calendarEventColor').value,details:document.getElementById('calendarEventDetails').value.trim()}); saveMeetings(); closeModal(); renderHiringCalendar(); renderUpcomingEvents(); toast('Событие обновлено'); };
+  window.deleteHiringEvent = (id) => { hiringMeetings.splice(hiringMeetings.findIndex(x=>Number(x.id)===Number(id)),1); saveMeetings(); closeModal(); renderHiringCalendar(); renderUpcomingEvents(); toast('Событие удалено'); };
+  window.openOffboardingCalendarDay = (date) => form('Новое событие оффбординга',{date,time:'10:00',title:'',color:'#f59e0b'},'createOffboardingCalendarEvent()',false);
+  window.createOffboardingCalendarEvent = () => { const title=document.getElementById('calendarEventTitle').value.trim(),date=document.getElementById('calendarEventDate').value;if(!title||!date){toast('Укажите название и дату');return;}const a=offEvents();a.push({id:Date.now(),date,time:document.getElementById('calendarEventTime').value||'10:00',title,details:document.getElementById('calendarEventDetails').value.trim(),color:document.getElementById('calendarEventColor').value});saveOffEvents(a);closeModal();renderOffboardingCalendar();renderUpcomingEvents();toast('Событие добавлено'); };
+  window.openOffboardingCalendarEvent = (id) => { const e=offEvents().find(x=>Number(x.id)===Number(id));if(!e)return;form('Редактировать событие',e,`updateOffboardingCalendarEvent(${e.id})`,true,`deleteOffboardingCalendarEvent(${e.id})`); };
+  window.updateOffboardingCalendarEvent = (id) => { const a=offEvents(),e=a.find(x=>Number(x.id)===Number(id));if(!e)return;Object.assign(e,{title:document.getElementById('calendarEventTitle').value.trim(),date:document.getElementById('calendarEventDate').value,time:document.getElementById('calendarEventTime').value,color:document.getElementById('calendarEventColor').value,details:document.getElementById('calendarEventDetails').value.trim()});saveOffEvents(a);closeModal();renderOffboardingCalendar();renderUpcomingEvents();toast('Событие обновлено'); };
+  window.deleteOffboardingCalendarEvent = (id) => {saveOffEvents(offEvents().filter(x=>Number(x.id)!==Number(id)));closeModal();renderOffboardingCalendar();renderUpcomingEvents();toast('Событие удалено');};
+  const oldHiring = window.renderHiringCalendar; window.renderHiringCalendar=()=>monthGrid(typeof calendarMonth!=='undefined'?calendarMonth:null,'hiring');
+  const oldOff = window.renderOffboardingCalendar; window.renderOffboardingCalendar=()=>monthGrid(typeof offboardingCalendarMonth!=='undefined'?offboardingCalendarMonth:null,'off');
+  window.changeHiringMonth = (offset) => { calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+offset,1); renderHiringCalendar(); };
+  window.changeOffboardingMonth = (offset) => { offboardingCalendarMonth=offboardingCalendarMonth||new Date(); offboardingCalendarMonth=new Date(offboardingCalendarMonth.getFullYear(),offboardingCalendarMonth.getMonth()+offset,1); renderOffboardingCalendar(); };
+  function upcoming() { const now=new Date(), end=new Date(now.getTime()+7*86400000), out=[]; hiringMeetings.forEach(x=>{const d=new Date(`${x.date}T${x.time||'00:00'}`);if(d>=now&&d<=end)out.push({date:x.date,time:x.time,title:x.title||x.stage,sub:x.candidate||'Календарь найма',color:colorFor(x),kind:'hiring'});});offEvents().forEach(x=>{const d=new Date(`${x.date}T${x.time||'00:00'}`);if(d>=now&&d<=end)out.push({date:x.date,time:x.time,title:x.title,sub:'Календарь оффбординга',color:x.color,kind:'off'});});(typeof offboardingPeople!=='undefined'?offboardingPeople:[]).forEach(p=>{if(p.lastDay){const d=new Date(`${p.lastDay}T09:00`);if(d>=now&&d<=end)out.push({date:p.lastDay,time:'09:00',title:'Последний рабочий день',sub:p.name,color:'#f59e0b',kind:'off'});}});return out.sort((a,b)=>`${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`)).slice(0,7);}
+  window.renderUpcomingEvents=()=>{const box=document.getElementById('upcomingEventsList');if(!box)return;const a=upcoming();box.innerHTML=a.length?a.map(x=>`<button class="upcoming-event" style="--event-color:${esc(x.color)}" onclick="openUpcomingEventsModal()"><span class="upcoming-event-date">${dateLabel(x.date)} · ${esc(x.time||'')}</span><span><b>${esc(x.title)}</b><small>${esc(x.sub)}</small></span></button>`).join(''):'<div class="empty">На ближайшую неделю событий нет</div>';};
+  window.openUpcomingEventsModal=()=>{const a=upcoming();document.getElementById('modalContent').innerHTML=`<div class="modalhead"><div><h2>Предстоящие события</h2><p class="mini">Ближайшие 7 дней</p></div><button class="close" onclick="closeModal()">×</button></div><div class="upcoming-modal-list">${a.map(x=>`<div class="upcoming-event modal-event" style="--event-color:${esc(x.color)}"><span class="upcoming-event-date">${dateLabel(x.date)} · ${esc(x.time||'')}</span><span><b>${esc(x.title)}</b><small>${esc(x.sub)}</small></span></div>`).join('')||'<div class="empty">Событий нет</div>'}</div><div class="modalfoot"><button class="btn" onclick="closeModal()">Закрыть</button></div>`;openModal();};
+  window.setTimeout(()=>{ if(typeof renderHiringCalendar==='function')renderHiringCalendar(); if(typeof renderOffboardingCalendar==='function')renderOffboardingCalendar(); renderUpcomingEvents(); },0);
+  window.setInterval(renderUpcomingEvents,3000);
+})();
