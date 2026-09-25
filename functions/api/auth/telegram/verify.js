@@ -25,18 +25,29 @@ export async function onRequestPost({ request, env }) {
     if (!hash || !authDate) return json({ error: 'Telegram не передал данные авторизации. Запустите вход ещё раз.' }, 400);
 
     const driftSeconds = Math.abs(Date.now() / 1000 - authDate);
-    if (driftSeconds > 600) return json({ error: 'Telegram login data expired', detail: 'Истёк срок действия данных Telegram. Запустите вход ещё раз.' }, 401);
+    if (driftSeconds > 600) return json({ error: 'Истёк срок действия данных Telegram. Запустите вход ещё раз.' }, 401);
 
-    stage = 'проверка подписи Telegram';
+    stage = 'проверка подписи Telegram: подготовка строки';
     const checkString = Object.keys(payload)
       .filter(key => key !== 'hash' && payload[key] !== undefined && payload[key] !== null)
       .sort()
-      .map(key => `${key}=${payload[key]}`)
+      .map(key => key + '=' + String(payload[key]))
       .join('\n');
 
-    const secretKey = await sha256(env.TELEGRAM_BOT_TOKEN);
-    const expected = hex(await hmac(secretKey, checkString));
-    if (expected !== hash) return json({ error: 'Invalid Telegram login signature' }, 401);
+    stage = 'проверка подписи Telegram: SHA-256 Bot Token';
+    const secretKey = new Uint8Array(await sha256(env.TELEGRAM_BOT_TOKEN));
+
+    stage = 'проверка подписи Telegram: HMAC-SHA-256';
+    const signatureBuffer = await hmac(secretKey, checkString);
+
+    stage = 'проверка подписи Telegram: сравнение';
+    const expected = hex(signatureBuffer);
+    if (expected !== hash) {
+      return json({
+        error: 'Invalid Telegram login signature',
+        detail: 'Подпись Telegram не совпала. Проверьте настройки Telegram Login Widget и Bot Token.'
+      }, 401);
+    }
 
     stage = 'проверка блокировки';
     const name = [payload.first_name, payload.last_name].filter(Boolean).join(' ') || (payload.username ? `@${payload.username}` : `Telegram ${payload.id}`);
@@ -72,8 +83,7 @@ export async function onRequestPost({ request, env }) {
     const name = error instanceof Error ? error.name : 'UnknownError';
     return json({
       error: 'Ошибка сервера авторизации',
-      detail: `Сбой на этапе: ${stage}`,
-      debug: `${name}: ${message}`
+      detail: `Сбой на этапе: ${stage} — ${name}: ${message}`
     }, 500);
   }
 }
