@@ -138,7 +138,7 @@
       const wrapper = document.createElement('div'); wrapper.id = 'telegram-login-widget'; wrapper.className = 'telegram-login-widget';
       host.insertAdjacentElement('afterend', wrapper);
       const script = document.createElement('script'); script.async = true; script.src = 'https://telegram.org/js/telegram-widget.js?22';
-      script.dataset.telegramLogin = 'teamdeck_login_bot'; script.dataset.size = 'medium'; script.dataset.userpic = 'false'; script.dataset.requestAccess = 'write'; script.dataset.authUrl = 'https://login.teamdeck.space/api/auth/telegram/callback';
+      script.dataset.telegramLogin = 'teamdeck_login_bot'; script.dataset.size = 'medium'; script.dataset.userpic = 'false'; script.dataset.requestAccess = 'write'; script.dataset.authUrl = 'https://login.teamdeck.space/api/auth/telegram/callback'; script.dataset.onauth = 'onTelegramAuth(user)';
       wrapper.appendChild(script); setStatus('Откройте Telegram и подтвердите вход.');
       clearInterval(telegramPoll);
       telegramPoll = setInterval(async () => {
