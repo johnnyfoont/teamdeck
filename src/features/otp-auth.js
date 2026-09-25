@@ -379,9 +379,9 @@
     await hydrateServerSession();
     // Server session is the single source of truth for cross-domain authentication.
     // The legacy teamdeck_cross_* cookies are intentionally ignored.
-    // Signal bootstrap.js only after server auth hydration is complete.
-    window.teamdeckAuthHydrated = true;
-    window.dispatchEvent(new Event('teamdeck:auth-hydrated'));
+    // Signal bootstrap.js only after the auth UI has been rendered.
+    // Otherwise bootstrap.js can immediately call showLoginScreen() and erase
+    // the diagnostic/error produced during Telegram handoff.
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
@@ -396,6 +396,8 @@
     syncSecurityMenu();
     startSessionMonitor();
     if (invalidated && typeof window.showLoginScreen === 'function') window.showLoginScreen();
+    window.teamdeckAuthHydrated = true;
+    window.dispatchEvent(new Event('teamdeck:auth-hydrated'));
     finishExternalLogin();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initOtpAuth);
