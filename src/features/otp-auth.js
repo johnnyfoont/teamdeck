@@ -88,6 +88,20 @@
     }
     localStorage.setItem('teamdeck-active-view', 'dashboard');
   }
+  async function hydrateServerSession() {
+    if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
+    try {
+      const response = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.authenticated || !data.profile) return;
+      localStorage.setItem('teamdeck-auth', 'logged-in');
+      localStorage.setItem('teamdeck-auth-method', 'external');
+      localStorage.setItem('teamdeck-auth-email', data.profile.email || '');
+      localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+      localStorage.setItem('teamdeck-active-view', 'dashboard');
+    } catch (_) {}
+  }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
   function isOtpSession() { return authMethod() === 'otp'; }
@@ -291,8 +305,9 @@
   };
 
   window.initOtpAuth = renderOtpForm;
-  function initOtpAuth() {
+  async function initOtpAuth() {
     rememberLoginTarget();
+    await hydrateServerSession();
     hydrateCrossDomainSession();
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
