@@ -61,9 +61,12 @@
   function rememberLoginTarget() { localStorage.removeItem('teamdeck-login-target'); }
   function setCrossDomainSession(profile, method) {
     if (!isTeamdeckDomain || isDemoDomain) return;
-    document.cookie = `teamdeck_cross_auth=1; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
-    document.cookie = `teamdeck_cross_method=${encodeURIComponent(method || 'external')}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
-    if (profile) document.cookie = `teamdeck_cross_profile=${encodeURIComponent(JSON.stringify(profile))}; Domain=.teamdeck.space; Path=/; Max-Age=2592000; Secure; SameSite=Lax`;
+    // Authentication is shared by the HttpOnly teamdeck_session cookie.
+    // Remove the legacy client-readable cross-domain cookies so they cannot
+    // participate in routing or restore a stale local session.
+    document.cookie = 'teamdeck_cross_auth=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
+    document.cookie = 'teamdeck_cross_method=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
+    document.cookie = 'teamdeck_cross_profile=; Domain=.teamdeck.space; Path=/; Max-Age=0; Secure; SameSite=Lax';
     const params = new URLSearchParams(location.search);
     const rawReturn = params.get('return') || '/dashboard';
     const returnPath = rawReturn.startsWith('/') && !rawReturn.startsWith('//') ? rawReturn : '/dashboard';
@@ -308,8 +311,9 @@
   async function initOtpAuth() {
     rememberLoginTarget();
     await hydrateServerSession();
-    hydrateCrossDomainSession();
-    // Signal bootstrap.js only after all server/cross-domain auth hydration is complete.
+    // Server session is the single source of truth for cross-domain authentication.
+    // The legacy teamdeck_cross_* cookies are intentionally ignored.
+    // Signal bootstrap.js only after server auth hydration is complete.
     window.teamdeckAuthHydrated = true;
     window.dispatchEvent(new Event('teamdeck:auth-hydrated'));
     const blockedIdentity = localStorage.getItem('teamdeck-blocked-state');
