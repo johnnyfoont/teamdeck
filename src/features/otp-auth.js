@@ -97,52 +97,54 @@
     const handoff = params.get('telegram_handoff');
     if (!handoff) return;
     let lastError = null;
+    window.teamdeckTelegramDiagnostic = '';
     for (let attempt = 0; attempt < 4; attempt += 1) {
       try {
         const response = await fetch('/api/auth/telegram/complete?handoff=' + encodeURIComponent(handoff), {
-          headers: { accept: 'application/json' },
-          credentials: 'include',
-          cache: 'no-store'
+          headers: { accept: 'application/json' }, credentials: 'include', cache: 'no-store'
         });
-        if (response.ok) {
-          history.replaceState({}, '', '/dashboard');
-          return;
-        }
         const body = await response.text();
-        let detail = '';
-        try {
-          const data = body ? JSON.parse(body) : {};
-          detail = data.detail || data.error || '';
-        } catch (_) {}
-        lastError = new Error(detail || ('Не удалось завершить вход через Telegram (HTTP ' + response.status + ')'));
+        let data = {};
+        try { data = body ? JSON.parse(body) : {}; } catch (_) {}
+        if (response.ok && data.authenticated) {
+          window.teamdeckTelegramDiagnostic = 'Handoff: найден в KV ✓ · cookie: установлена ✓';
+          history.replaceState({}, '', '/dashboard');
+          return true;
+        }
+        lastError = new Error(data.detail || data.error || ('HTTP ' + response.status));
+        window.teamdeckTelegramDiagnostic = 'Handoff: НЕ найден / ошибка · ' + lastError.message;
       } catch (error) {
         lastError = error;
+        window.teamdeckTelegramDiagnostic = 'Handoff: ошибка запроса · ' + (error.message || error);
       }
       if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 300));
     }
     console.error('Telegram handoff failed:', lastError);
-    setError(lastError?.message || 'Не удалось завершить вход через Telegram');
+    return false;
   }
 
   async function hydrateServerSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
+    window.teamdeckServerDiagnostic = '';
     for (let attempt = 0; attempt < 4; attempt += 1) {
       try {
-        const response = await fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.authenticated && data.profile) {
-            localStorage.setItem('teamdeck-auth', 'logged-in');
-            localStorage.setItem('teamdeck-auth-method', 'external');
-            localStorage.setItem('teamdeck-auth-email', data.profile.email || '');
-            localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
-            localStorage.setItem('teamdeck-active-view', 'dashboard');
-            return;
-          }
+        const response = await fetch('/api/auth/session?debug=1', { credentials: 'include', cache: 'no-store' });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.authenticated && data.profile) {
+          localStorage.setItem('teamdeck-auth', 'logged-in');
+          localStorage.setItem('teamdeck-auth-method', 'external');
+          localStorage.setItem('teamdeck-auth-email', data.profile.email || '');
+          localStorage.setItem('teamdeck-auth-profile', JSON.stringify(data.profile));
+          localStorage.setItem('teamdeck-active-view', 'dashboard');
+          window.teamdeckServerDiagnostic = 'Session: cookie ✓ · KV-сессия ✓';
+          return true;
         }
-      } catch (_) {}
+        const d = data.debug || {};
+        window.teamdeckServerDiagnostic = 'Session: cookie ' + (d.hasSessionCookie ? '✓' : '✗') + ' · KV binding ' + (d.hasTeamdeckKvBinding ? '✓' : '✗') + ' · KV-сессия ' + (d.sessionFoundInKv ? '✓' : '✗');
+      } catch (error) { window.teamdeckServerDiagnostic = 'Session: ошибка запроса · ' + (error.message || error); }
       if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 300));
     }
+    return false;
   }
   function savedProfile() { try { return JSON.parse(localStorage.getItem('teamdeck-auth-profile') || 'null'); } catch (_) { return null; } }
   function authMethod() { return localStorage.getItem('teamdeck-auth-method') || ''; }
@@ -384,6 +386,9 @@
     if (blockedIdentity) { showBlockedScreen(blockedIdentity); return; }
     const invalidated = invalidateOldDemoSession();
     renderOtpForm();
+    if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && (window.teamdeckTelegramDiagnostic || window.teamdeckServerDiagnostic)) {
+      setError([window.teamdeckTelegramDiagnostic, window.teamdeckServerDiagnostic].filter(Boolean).join(' | '));
+    }
     if (localStorage.getItem('teamdeck-auth') !== 'logged-in') { document.body.classList.add('auth-minimal'); hideFloatingWidgets(); setTimeout(hideFloatingWidgets, 250); setTimeout(hideFloatingWidgets, 1000); }
     const external = isOtpSession() || isExternalSession();
     if (localStorage.getItem('teamdeck-auth') === 'logged-in') showApp();
