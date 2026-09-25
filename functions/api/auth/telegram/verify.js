@@ -75,7 +75,7 @@ export async function onRequestPost({ request, env }) {
     stage = 'формирование ответа';
     // Send the browser to the demo application's normal entry point with the handoff in the query string.
     const redirectUrl = `https://demo.teamdeck.space/?telegram_handoff=${encodeURIComponent(handoff)}`;
-    return json({ profile, redirectUrl }, 200, {
+    return json({ profile, handoff, redirectUrl }, 200, {
       'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request)
     });
   } catch (error) {
