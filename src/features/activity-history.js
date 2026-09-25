@@ -16,7 +16,20 @@
     try { return typeof data !== 'undefined' ? data : {}; } catch (_) { return {}; }
   };
   const load = () => {
-    try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; }
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (!Array.isArray(parsed)) return [];
+      const screening = parsed.filter((item) => item.title === 'Отклик перешёл на этап «Скрининг»');
+      const cleaned = parsed.filter((item) => {
+        if (item.title !== 'Отклик получил отказ') return true;
+        return !screening.some((moved) => {
+          const samePerson = String(moved.detail || '').split(' · ')[0] === String(item.detail || '').split(' · ')[0];
+          return samePerson && Math.abs(Number(moved.timestamp || 0) - Number(item.timestamp || 0)) <= 120000;
+        });
+      });
+      if (cleaned.length !== parsed.length) localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned.slice(0, MAX_EVENTS)));
+      return cleaned;
+    } catch (_) { return []; }
   };
   const save = (items) => localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_EVENTS)));
 
