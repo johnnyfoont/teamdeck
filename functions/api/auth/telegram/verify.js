@@ -73,8 +73,9 @@ export async function onRequestPost({ request, env }) {
     await env.TEAMDECK_KV.put(`telegram:handoff:${handoff}`, JSON.stringify({ session }), { expirationTtl: 60 });
 
     stage = 'формирование ответа';
-    const completeUrl = `https://demo.teamdeck.space/api/auth/telegram/complete?handoff=${encodeURIComponent(handoff)}`;
-    return json({ profile, redirectUrl: completeUrl }, 200, {
+    // Send the browser to the demo application's normal entry point with the handoff in the query string.
+    const redirectUrl = `https://demo.teamdeck.space/?telegram_handoff=${encodeURIComponent(handoff)}`;
+    return json({ profile, redirectUrl }, 200, {
       'set-cookie': cookie('teamdeck_session', session, 60 * 60 * 24 * 30, request)
     });
   } catch (error) {
