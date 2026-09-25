@@ -627,3 +627,18 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .event-type-vacancy{border-color:#3b82f6;color:#3b82f6}.event-type-candidate{border-color:#a78bfa;color:#a78bfa}.event-type-onboarding{border-color:#22c55e;color:#22c55e}.event-type-offboarding{border-color:#f97316;color:#f97316}.event-type-organization{border-color:#eab308;color:#eab308}
 .action-history-empty{padding:30px 10px;text-align:center;color:#94a3b8;font-size:.85rem}
 .action-history-toolbar{display:flex;gap:8px;margin:16px 0}.action-history-toolbar .btn{font-size:.82rem;padding:9px 13px}.action-history-modal-list{max-height:55vh;overflow:auto;padding-right:10px}.action-history-modal-list .action-history-event{padding-top:11px;padding-bottom:11px}.action-history-modal-list .action-history-copy b{font-size:.95rem}.action-history-modal-list .action-history-copy small{font-size:.85rem;white-space:normal}
+
+/* Action history visual refinement */
+.action-history-list,.action-history-modal-list{gap:10px!important}
+.action-history-event{display:grid!important;grid-template-columns:58px minmax(0,1fr)!important;align-items:start!important;gap:14px!important;min-height:54px!important;padding:11px 14px 11px 16px!important;border-left-width:4px!important;background:rgba(15,23,42,.22)!important}
+.action-history-event:before{top:18px!important}
+.action-history-event.is-latest{min-height:64px!important;padding-top:14px!important;padding-bottom:14px!important;background:rgba(59,130,246,.14)!important}
+.action-history-time{display:block!important;font-size:.76rem!important;line-height:1.35!important;color:#aab7ca!important;padding-top:1px!important}
+.action-history-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;min-width:0!important}
+.action-history-copy b{display:block!important;font-size:.92rem!important;line-height:1.3!important;color:#f8fafc!important;white-space:normal!important}
+.action-history-copy small{display:block!important;font-size:.8rem!important;line-height:1.35!important;color:#aab7ca!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.action-history-event.is-latest .action-history-copy b{font-size:1rem!important}
+.event-type-vacancy{background:rgba(59,130,246,.12)!important}.event-type-candidate{background:rgba(167,139,250,.12)!important}.event-type-onboarding{background:rgba(34,197,94,.11)!important}.event-type-offboarding{background:rgba(249,115,22,.12)!important}.event-type-organization{background:rgba(234,179,8,.12)!important}
+.action-history-modal-list{gap:12px!important;max-height:58vh!important}
+.action-history-modal-list .action-history-event{min-height:66px!important}
+.action-history-modal-list .action-history-copy b{font-size:1rem!important}

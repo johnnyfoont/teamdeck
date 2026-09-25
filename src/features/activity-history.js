@@ -60,19 +60,31 @@
       (item) => addEvent('vacancy', item.status === 'Закрыта' ? 'Вакансия закрыта' : 'Вакансия удалена', item.title),
       (oldItem, item) => { if (oldItem.status !== item.status && item.status === 'Закрыта') addEvent('vacancy', 'Вакансия закрыта', item.title); });
 
+    const removedResponses = [];
     diffMap(before.responses, after.responses,
-      (item) => addEvent('candidate', 'Получен новый отклик', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`),
-      (item) => addEvent('candidate', 'Отклик получил отказ', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`),
+      (item) => { addEvent('candidate', 'Получен новый отклик', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`); },
+      (item) => { removedResponses.push(item); },
       () => {});
 
+    const movedResponseNames = new Set();
     diffMap(before.candidates, after.candidates,
-      (item) => addEvent('candidate', 'Добавлен новый кандидат', item.name),
+      (item) => {
+        const moved = removedResponses.find((response) => response.name === item.name && item.stage === 'Скрининг');
+        if (moved) {
+          movedResponseNames.add(moved.name);
+          addEvent('candidate', 'Отклик перешёл на этап «Скрининг»', `${item.name}${moved.vacancy ? ` · ${moved.vacancy}` : ''}`);
+        } else addEvent('candidate', 'Добавлен новый кандидат', item.name);
+      },
       (item) => addEvent('candidate', 'Кандидат удалён', item.name),
       (oldItem, item) => {
         if (oldItem.stage === item.stage) return;
         const finalStage = item.stage === 'Нанято';
         addEvent('candidate', finalStage ? 'Кандидат принял оффер и перешёл в онбординг' : 'Кандидат перешёл на новый этап', `${item.name} · ${item.stage}`);
       });
+
+    removedResponses.filter((item) => !movedResponseNames.has(item.name)).forEach((item) => {
+      addEvent('candidate', 'Отклик получил отказ', `${item.name}${item.vacancy ? ` · ${item.vacancy}` : ''}`);
+    });
 
     const onboardingStages = readArray('onboardingStages');
     diffMap(before.onboarding, after.onboarding,
