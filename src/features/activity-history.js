@@ -20,10 +20,16 @@
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       if (!Array.isArray(parsed)) return [];
       const screening = parsed.filter((item) => item.title === 'Отклик перешёл на этап «Скрининг»');
+      const liveData = currentData();
+      const liveScreeningNames = new Set((Array.isArray(liveData.candidates) ? liveData.candidates : [])
+        .filter((candidate) => candidate.stage === 'Скрининг')
+        .map((candidate) => String(candidate.name || '').trim()));
       const cleaned = parsed.filter((item) => {
         if (item.title !== 'Отклик получил отказ') return true;
+        const itemName = String(item.detail || '').split(' · ')[0].trim();
+        if (liveScreeningNames.has(itemName)) return false;
         return !screening.some((moved) => {
-          const samePerson = String(moved.detail || '').split(' · ')[0] === String(item.detail || '').split(' · ')[0];
+          const samePerson = String(moved.detail || '').split(' · ')[0] === itemName;
           return samePerson && Math.abs(Number(moved.timestamp || 0) - Number(item.timestamp || 0)) <= 120000;
         });
       });

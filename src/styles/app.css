@@ -642,3 +642,11 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .action-history-modal-list{gap:12px!important;max-height:58vh!important}
 .action-history-modal-list .action-history-event{min-height:66px!important}
 .action-history-modal-list .action-history-copy b{font-size:1rem!important}
+
+/* Keep the latest event color identical in dashboard and modal. */
+.action-history-event.is-latest.event-type-vacancy{background:rgba(59,130,246,.12)!important}
+.action-history-event.is-latest.event-type-candidate{background:rgba(167,139,250,.12)!important}
+.action-history-event.is-latest.event-type-onboarding{background:rgba(34,197,94,.11)!important}
+.action-history-event.is-latest.event-type-offboarding{background:rgba(249,115,22,.12)!important}
+.action-history-event.is-latest.event-type-organization{background:rgba(234,179,8,.12)!important}
+.action-history-event.is-latest{box-shadow:0 0 0 1px currentColor,0 8px 20px rgba(0,0,0,.12)!important}
