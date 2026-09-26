@@ -716,3 +716,8 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 #dashboard .card{background:rgba(20,32,48,.72)!important}
 /* Checklist items use a deeper neutral gray than the dashboard surface. */
 .upcoming-event.checklist-event{background:#242b36!important;border-left-color:#6b7280!important}
+/* Dashboard feed entrance animation. */
+@keyframes dashboard-block-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#dashboard .action-history-card,#dashboard .upcoming-events-card{animation:dashboard-block-enter .36s cubic-bezier(.23,1,.32,1) both}
+#dashboard .upcoming-events-card{animation-delay:.08s}
+@media(prefers-reduced-motion:reduce){#dashboard .action-history-card,#dashboard .upcoming-events-card{animation:none}}
