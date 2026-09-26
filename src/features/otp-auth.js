@@ -291,6 +291,14 @@
 
   const originalLogout = window.logoutUser;
   const originalLogin = window.loginUser;
+  const originalShowApp = window.showApp;
+  window.showApp = function () {
+    if (isLoginDomain) {
+      window.location.replace('https://demo.teamdeck.space/dashboard');
+      return;
+    }
+    if (typeof originalShowApp === 'function') return originalShowApp();
+  };
   window.loginUser = function () {
     const username = document.getElementById('loginUsername')?.value.trim();
     const password = document.getElementById('loginPassword')?.value || '';
