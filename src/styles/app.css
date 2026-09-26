@@ -757,3 +757,7 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 /* Keep the resume control as wide as the former icon + label + open action. */
 .response-row-resume{min-width:208px!important;justify-content:flex-start!important;padding-right:28px!important}
 @media(max-width:980px){.response-row-resume{min-width:190px!important}}
+
+/* Compact resume control: let the response-list column determine its width. */
+.response-row-resume{min-width:0!important;width:100%!important;padding-right:10px!important}
+@media(max-width:980px){.response-row-resume{min-width:0!important}}
