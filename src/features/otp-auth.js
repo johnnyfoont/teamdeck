@@ -330,6 +330,7 @@
     const invalidated = invalidateOldDemoSession();
     if (isLoginDomain && !gmailConnected && location.pathname !== '/') history.replaceState({}, '', '/');
     renderOtpForm();
+    if (isLoginDomain && typeof window.showLoginScreen === 'function') window.showLoginScreen();
     if (localStorage.getItem('teamdeck-auth') !== 'logged-in' && (window.teamdeckTelegramDiagnostic || window.teamdeckServerDiagnostic)) {
       setError([window.teamdeckTelegramDiagnostic, window.teamdeckServerDiagnostic].filter(Boolean).join(' | '));
     }
