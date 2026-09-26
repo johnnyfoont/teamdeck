@@ -27,5 +27,5 @@ export async function onRequestGet({ request, env }) {
     await env.TEAMDECK_KV.put('gmail:profile', JSON.stringify(normalizedProfile));
     await env.TEAMDECK_KV.put(`gmail:profile:${await sha256(normalizedProfile.email)}`, JSON.stringify(normalizedProfile));
   }
-  return Response.redirect(`${appOrigin(request, env)}/login?gmail=connected`, 302);
+  return Response.redirect(`${appOrigin(request, env)}/?gmail=connected`, 302);
 }

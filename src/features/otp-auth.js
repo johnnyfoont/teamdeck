@@ -58,6 +58,8 @@
   }
   const isTeamdeckDomain = /(^|\.)teamdeck\.space$/i.test(location.hostname);
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
+  const isLoginDomain = location.hostname === 'login.teamdeck.space';
+  const gmailConnected = new URLSearchParams(location.search).get('gmail') === 'connected';
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
     const cookies = Object.fromEntries(document.cookie.split(';').map(item => item.trim().split('=').map(decodeURIComponent)).filter(pair => pair[0]));
@@ -332,7 +334,12 @@
     }
     if (localStorage.getItem('teamdeck-auth') !== 'logged-in') { document.body.classList.add('auth-minimal'); hideFloatingWidgets(); setTimeout(hideFloatingWidgets, 250); setTimeout(hideFloatingWidgets, 1000); }
     const external = isOtpSession() || isExternalSession();
-    if (localStorage.getItem('teamdeck-auth') === 'logged-in') showApp();
+    if (isLoginDomain && localStorage.getItem('teamdeck-auth') === 'logged-in' && !gmailConnected) {
+      window.location.replace('https://demo.teamdeck.space/dashboard');
+      return;
+    }
+    if (localStorage.getItem('teamdeck-auth') === 'logged-in' && !gmailConnected) showApp();
+    if (gmailConnected) { document.body.classList.add('auth-minimal'); hideFloatingWidgets(); }
     syncProfile(external ? (savedProfile() || { name: savedEmail() }) : demoProfile, external ? authMethod() : 'demo');
     syncSecurityMenu();
     startSessionMonitor();
