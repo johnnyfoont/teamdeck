@@ -768,3 +768,6 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 
 /* Keep the table top edge; only the header separator stays removed. */
 .response-list{border-top:1px solid var(--line)!important}
+
+/* Match the rounded lower corners on the restored table top edge. */
+.response-list{border-radius:12px!important}
