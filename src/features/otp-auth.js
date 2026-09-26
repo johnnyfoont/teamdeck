@@ -60,6 +60,13 @@
   const isDemoDomain = location.hostname === 'demo.teamdeck.space';
   const isLoginDomain = location.hostname === 'login.teamdeck.space';
   const gmailConnected = new URLSearchParams(location.search).get('gmail') === 'connected';
+  function setCrossDomainSession(profile, method) {
+    if (!isTeamdeckDomain) return;
+    const attrs = '; Domain=.teamdeck.space; Path=/; Max-Age=86400; Secure; SameSite=Lax';
+    document.cookie = `teamdeck_cross_auth=1${attrs}`;
+    document.cookie = `teamdeck_cross_method=${encodeURIComponent(method || 'external')}${attrs}`;
+    if (profile) document.cookie = `teamdeck_cross_profile=${encodeURIComponent(JSON.stringify(profile))}${attrs}`;
+  }
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
     const cookies = Object.fromEntries(document.cookie.split(';').map(item => item.trim().split('=').map(decodeURIComponent)).filter(pair => pair[0]));
