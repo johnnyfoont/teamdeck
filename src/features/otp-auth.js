@@ -344,6 +344,7 @@
 
   window.initOtpAuth = renderOtpForm;
   async function initOtpAuth() {
+    hydrateCrossDomainSession();
     await hydrateServerSession();
     // Server session is the single source of truth for cross-domain authentication.
     // The legacy teamdeck_cross_* cookies are intentionally ignored.
