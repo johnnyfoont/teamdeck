@@ -69,6 +69,15 @@
   }
   function hydrateCrossDomainSession() {
     if (!isDemoDomain || localStorage.getItem('teamdeck-auth') === 'logged-in') return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('demo_session') === '1') {
+      localStorage.setItem('teamdeck-auth', 'logged-in');
+      localStorage.setItem('teamdeck-auth-method', 'demo');
+      localStorage.setItem('teamdeck-demo-session-version', DEMO_SESSION_VERSION);
+      localStorage.setItem('teamdeck-active-view', 'dashboard');
+      history.replaceState({}, '', '/dashboard');
+      return;
+    }
     const cookies = Object.fromEntries(document.cookie.split(';').map(item => item.trim().split('=').map(decodeURIComponent)).filter(pair => pair[0]));
     if (cookies.teamdeck_cross_auth !== '1') return;
     localStorage.setItem('teamdeck-auth', 'logged-in');
@@ -301,7 +310,8 @@
   const originalShowApp = window.showApp;
   window.showApp = function () {
     if (isLoginDomain) {
-      window.location.replace('https://demo.teamdeck.space/dashboard');
+      const target = authMethod() === 'demo' ? 'https://demo.teamdeck.space/dashboard?demo_session=1' : 'https://demo.teamdeck.space/dashboard';
+      window.location.replace(target);
       return;
     }
     if (typeof originalShowApp === 'function') return originalShowApp();
