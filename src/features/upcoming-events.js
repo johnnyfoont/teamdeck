@@ -31,7 +31,7 @@
       html += `<div class="calendar-day ${isToday?'today':''}" onclick="${type==='hiring'?`openHiringDay('${iso}')`:`openOffboardingCalendarDay('${iso}')`}"><div class="day-number">${d}</div>${items.map(x=>`<button type="button" class="calendar-event ${x._kind==='person'?'offboarding-calendar-event':''}" style="--event-color:${esc(colorFor(x))}" onclick="event.stopPropagation();${x._kind==='hiring'?`openMeeting(${x.id})`:x._kind==='off'?`openOffboardingCalendarEvent(${x.id})`:`openOffboardingPerson(${x.id})`}"><span>${esc(x.time ? `${x.time} · ` : '')}${esc(x.title||x.stage||x.name)}</span>${x.subtitle?`<small>${esc(x.subtitle)}</small>`:''}</button>`).join('')}</div>`;
     }
     const total=first+days; for(let i=1;i<=42-total;i++) html += `<div class="calendar-day muted"><div class="day-number">${i}</div></div>`;
-    grid.innerHTML=html;
+    grid.innerHTML=type==='off'?`<div class="calendar-grid offboarding-month-grid" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-flow:row">${html}</div>`:html;
   }
   function form(title, event, action, canDelete, deleteAction) {
     const e=event||{date:today(),time:'10:00',title:'',color:'#8b7cf6',details:''};
