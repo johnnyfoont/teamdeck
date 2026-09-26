@@ -721,3 +721,5 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 #dashboard .action-history-card,#dashboard .upcoming-events-card{animation:dashboard-block-enter .36s cubic-bezier(.23,1,.32,1) both}
 #dashboard .upcoming-events-card{animation-delay:.08s}
 @media(prefers-reduced-motion:reduce){#dashboard .action-history-card,#dashboard .upcoming-events-card{animation:none}}
+/* History modal uses the same surface as the dashboard history card. */
+.modal:has(.action-history-modal-list){background:rgba(20,32,48,.72)!important;border-color:rgba(133,151,180,.24)!important}
