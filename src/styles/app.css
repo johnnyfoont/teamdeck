@@ -688,3 +688,13 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 @media(max-width:700px){.upcoming-event{grid-template-columns:1fr;gap:5px}.upcoming-events-list{max-height:360px}}
 .upcoming-event.checklist-event{grid-template-columns:1fr;background:#303744;border-left-color:#6b7280!important}
 .upcoming-event.checklist-event small{color:#b8c0cc}
+/* Compact dashboard history: keep three events visible at once. */
+.action-history-list{height:200px!important;min-height:200px!important;max-height:200px!important;gap:8px!important}
+.action-history-list .action-history-event,.action-history-list .action-history-event.is-latest{height:60px!important;min-height:60px!important;max-height:60px!important;padding:7px 12px 7px 14px!important;grid-template-columns:48px minmax(0,1fr)!important;gap:10px!important}
+.action-history-list .action-history-event.is-latest{height:64px!important;min-height:64px!important;max-height:64px!important;padding-top:9px!important;padding-bottom:9px!important}
+.action-history-list .action-history-event:before{top:15px!important}
+.action-history-list .action-history-event.is-latest:before{top:17px!important}
+.action-history-list .action-history-copy{gap:2px!important}
+.action-history-list .action-history-copy b,.action-history-list .action-history-event.is-latest .action-history-copy b{font-size:.82rem!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.action-history-list .action-history-copy small{font-size:.7rem!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.action-history-list .action-history-time{font-size:.7rem!important;padding-top:1px!important}
