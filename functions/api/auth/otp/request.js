@@ -24,14 +24,14 @@ export async function onRequestPost({ request, env }) {
   if (!isEmail(email)) return json({ error: 'Введите корректный e-mail' }, 400);
   const code = randomCode();
   const key = `otp:${await sha256(email)}`;
-  await env.TEAMDECK_KV.put(key, JSON.stringify({ email, codeHash: await sha256(code), createdAt: Date.now() }), { expirationTtl: 600 });
   try {
+    await env.TEAMDECK_KV.put(key, JSON.stringify({ email, codeHash: await sha256(code), createdAt: Date.now() }), { expirationTtl: 600 });
     const token = await getGmailAccessToken(env);
     const message = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ raw: base64url(rawMessage({ to: email, from: env.OTP_SENDER_EMAIL, code })) }) });
     if (!message.ok) throw new Error('Gmail send failed');
   } catch (error) {
-    await env.TEAMDECK_KV.delete(key);
-    return json({ error: 'Сессия Gmail недействительна. Переподключите Gmail и повторите попытку.', action: 'reconnect_gmail', reconnectUrl: '/api/auth/gmail/start' }, 502);
+    try { await env.TEAMDECK_KV.delete(key); } catch (_) {}
+    return json({ error: 'Не удалось отправить код через Gmail. Переподключите Gmail и повторите попытку.', action: 'reconnect_gmail', reconnectUrl: '/api/auth/gmail/start' }, 502);
   }
   return json({ ok: true, expiresIn: 600, message: 'Код отправлен на почту' });
 }
