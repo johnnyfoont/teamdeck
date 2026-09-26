@@ -93,6 +93,10 @@
     // Always ask the demo server first. A stale demo/localStorage flag must not
     // override a valid Telegram session created by the handoff endpoint.
     if (!isDemoDomain) return;
+    if (localStorage.getItem('teamdeck-auth') === 'logged-in' && localStorage.getItem('teamdeck-auth-method') === 'demo') {
+      window.teamdeckServerDiagnostic = 'Session: demo-сессия ✓';
+      return true;
+    }
     window.teamdeckServerDiagnostic = '';
     for (let attempt = 0; attempt < 4; attempt += 1) {
       try {
