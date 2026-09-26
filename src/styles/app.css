@@ -714,3 +714,5 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 @media(max-width:700px){.dashboard-funnel-card .barrow{grid-template-columns:112px minmax(0,1fr) 34px!important;gap:9px!important;padding-left:6px!important;padding-right:6px!important}}
 /* Unified dashboard surfaces: match every block to the hiring funnel panel. */
 #dashboard .card{background:rgba(20,32,48,.72)!important}
+/* Checklist items use a deeper neutral gray than the dashboard surface. */
+.upcoming-event.checklist-event{background:#242b36!important;border-left-color:#6b7280!important}
