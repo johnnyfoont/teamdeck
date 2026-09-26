@@ -16,11 +16,11 @@ export async function onRequestGet({ request, env }) {
   const profile = profileResponse.ok ? await profileResponse.json() : {};
   const email = normalizeEmail(profile.default_email || profile.emails?.[0] || profile.email);
   if (!email) return new Response('Yandex did not return an email address', { status: 502 });
-  if (await isSecurityBlocked(env, email)) return redirect(`${appOrigin(request, env)}/login?blocked=1&identity=${encodeURIComponent(email)}`);
+  if (await isSecurityBlocked(env, email)) return redirect(`${appOrigin(request, env)}/?blocked=1&identity=${encodeURIComponent(email)}`);
   const userProfile = { email, name: [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.display_name || email, picture: profile.default_avatar_id ? `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200` : '', provider: 'yandex' };
   const handoff = crypto.randomUUID();
   await env.TEAMDECK_KV.put(`oauth:yandex:session:${handoff}`, JSON.stringify(userProfile), { expirationTtl: 120 });
   await env.TEAMDECK_KV.put(`external:profile:${await sha256(email)}`, JSON.stringify(userProfile));
   await recordSecurityEvent(env, request, { user: userProfile.name, identity: email, method: 'Яндекс' });
-  return redirect(`${appOrigin(request, env)}/login?external=yandex&state=${encodeURIComponent(handoff)}`);
+  return redirect(`https://demo.teamdeck.space/api/auth/yandex/complete?handoff=${encodeURIComponent(handoff)}`);
 }
