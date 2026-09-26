@@ -153,6 +153,7 @@
   window.startExternalLogin = function (provider) {
     const labels = { yandex: 'Яндекс', mailru: 'Mail.ru', telegram: 'Telegram' };
     if (provider === 'yandex') { window.location.href = '/api/auth/yandex/start'; return; }
+    if (provider === 'mailru') { window.location.href = '/api/auth/mailru/start'; return; }
     if (provider === 'telegram') {
       const existing = document.getElementById('telegram-login-widget');
       if (existing) { existing.hidden = false; return; }
