@@ -152,15 +152,15 @@
     const host = document.getElementById('actionHistoryList');
     if (!host) return;
     const items = load().sort((a, b) => sort === 'newest' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
-    const maxStart = Math.max(0, items.length - 2);
+    const maxStart = Math.max(0, items.length - 3);
     if (feedOffset > maxStart) feedOffset = 0;
-    const visibleItems = items.slice(feedOffset, feedOffset + 2);
+    const visibleItems = items.slice(feedOffset, feedOffset + 3);
     host.innerHTML = visibleItems.length ? visibleItems.map((item, index) => { const titleLength = String(item.title || '').length; const titleSize = titleLength > 48 ? 'long' : titleLength > 30 ? 'medium' : 'normal'; return `<div class="action-history-event event-type-${esc(item.type)} ${index === 0 && sort === 'newest' ? 'is-latest' : ''}"><div class="action-history-time">${esc(item.time)}</div><div class="action-history-copy"><b class="action-history-title-${titleSize}">${esc(item.title)}</b><small>${esc(item.detail)}</small></div></div>`; }).join('') : '<div class="action-history-empty">Изменения в системе появятся здесь</div>';
     if (!scrollTimer) {
       scrollTimer = window.setInterval(() => {
         const current = load();
-        if (current.length <= 2) return;
-        const max = Math.max(0, current.length - 2);
+        if (current.length <= 3) return;
+        const max = Math.max(0, current.length - 3);
         feedOffset = feedOffset >= max ? 0 : feedOffset + 1;
         render();
       }, 3000);
