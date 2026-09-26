@@ -688,3 +688,5 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 @media(max-width:700px){.upcoming-event{grid-template-columns:1fr;gap:5px}.upcoming-events-list{max-height:360px}}
 .upcoming-event.checklist-event{grid-template-columns:1fr;background:#303744;border-left-color:#6b7280!important}
 .upcoming-event.checklist-event small{color:#b8c0cc}
+.modal:has(.upcoming-modal-list){width:min(920px,calc(100vw - 40px))}
+@media(max-width:700px){.modal:has(.upcoming-modal-list){width:calc(100vw - 24px)}}
