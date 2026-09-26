@@ -765,3 +765,6 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 /* Resume button keeps its grid position but hugs the icon and label symmetrically. */
 .response-row-resume{width:max-content!important;min-width:0!important;justify-self:start!important;padding:7px 16px!important}
 @media(max-width:680px){.response-row-resume{width:100%!important;justify-self:stretch!important;padding:7px 12px!important}}
+
+/* Keep the table top edge; only the header separator stays removed. */
+.response-list{border-top:1px solid var(--line)!important}
