@@ -800,3 +800,16 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(2){animation-delay:.31s}.views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(3){animation-delay:.36s}.views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(4){animation-delay:.41s}
 .views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(2){animation-delay:.36s}.views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(3){animation-delay:.41s}.views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(4){animation-delay:.46s}
 @media(prefers-reduced-motion:reduce){.views.active#pipeline .top,.views.active#pipeline .kanban,.views.active#pipeline .kanban .col,.views.active#pipeline .kanban .candidate{animation:none!important}}
+
+/* Pipeline motion matches Vacancies/Candidates: tdSoftLine, 0.5s, 0.08s cadence. */
+.views.active#pipeline .top{animation:tdSoftLine .5s ease both}
+.views.active#pipeline .kanban{animation:tdSoftLine .5s ease .08s both}
+.views.active#pipeline .kanban .col{animation:tdSoftLine .5s ease both}
+.views.active#pipeline .kanban .col:nth-child(1){animation-delay:.08s}.views.active#pipeline .kanban .col:nth-child(2){animation-delay:.16s}.views.active#pipeline .kanban .col:nth-child(3){animation-delay:.24s}.views.active#pipeline .kanban .col:nth-child(4){animation-delay:.32s}.views.active#pipeline .kanban .col:nth-child(5){animation-delay:.40s}
+.views.active#pipeline .kanban .candidate{animation:tdSoftLine .5s ease both}
+.views.active#pipeline .kanban .col:nth-child(1) .candidate:nth-child(2){animation-delay:.16s}.views.active#pipeline .kanban .col:nth-child(1) .candidate:nth-child(3){animation-delay:.24s}.views.active#pipeline .kanban .col:nth-child(1) .candidate:nth-child(4){animation-delay:.32s}
+.views.active#pipeline .kanban .col:nth-child(2) .candidate:nth-child(2){animation-delay:.24s}.views.active#pipeline .kanban .col:nth-child(2) .candidate:nth-child(3){animation-delay:.32s}.views.active#pipeline .kanban .col:nth-child(2) .candidate:nth-child(4){animation-delay:.40s}
+.views.active#pipeline .kanban .col:nth-child(3) .candidate:nth-child(2){animation-delay:.32s}.views.active#pipeline .kanban .col:nth-child(3) .candidate:nth-child(3){animation-delay:.40s}.views.active#pipeline .kanban .col:nth-child(3) .candidate:nth-child(4){animation-delay:.48s}
+.views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(2){animation-delay:.40s}.views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(3){animation-delay:.48s}.views.active#pipeline .kanban .col:nth-child(4) .candidate:nth-child(4){animation-delay:.56s}
+.views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(2){animation-delay:.48s}.views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(3){animation-delay:.56s}.views.active#pipeline .kanban .col:nth-child(5) .candidate:nth-child(4){animation-delay:.64s}
+@media(prefers-reduced-motion:reduce){.views.active#pipeline .top,.views.active#pipeline .kanban,.views.active#pipeline .kanban .col,.views.active#pipeline .kanban .candidate{animation-duration:.01ms!important;animation-delay:0!important}}
