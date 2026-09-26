@@ -753,3 +753,7 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .response-row-resume .response-resume-icon{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}
 .response-row-resume span{font-size:12px}.response-row-resume:hover .response-resume-icon{color:var(--text)}
 @media(max-width:680px){.response-list{border-top:1px solid var(--line)!important;border-radius:10px!important}}
+
+/* Keep the resume control as wide as the former icon + label + open action. */
+.response-row-resume{min-width:208px!important;justify-content:flex-start!important;padding-right:28px!important}
+@media(max-width:980px){.response-row-resume{min-width:190px!important}}
