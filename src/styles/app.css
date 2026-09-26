@@ -712,3 +712,5 @@ body.dark .platform-select-menu,.dark .platform-select-menu{background:#172536;b
 .dashboard-funnel-card .bar{height:10px!important;background:rgba(100,119,148,.34)!important}
 .dashboard-funnel-card .bar i{background:linear-gradient(90deg,#0658f6,#2b7dff)!important;box-shadow:0 0 10px rgba(6,88,246,.22)}
 @media(max-width:700px){.dashboard-funnel-card .barrow{grid-template-columns:112px minmax(0,1fr) 34px!important;gap:9px!important;padding-left:6px!important;padding-right:6px!important}}
+/* Unified dashboard surfaces: match every block to the hiring funnel panel. */
+#dashboard .card{background:rgba(20,32,48,.72)!important}
